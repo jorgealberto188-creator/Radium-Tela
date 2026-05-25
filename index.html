@@ -349,6 +349,20 @@
 </div>
 
 <script>
+// ===================== ESTADO GLOBAL =====================
+const state = {
+  role: null, sessionCode: null, nomeAluno: null,
+  _canal: null, wsReady: false, wsQueue: [],
+  viewers: {},
+  profDrawMode: false, profTool: 'pen', profColor: '#ff4444',
+  profDrawings: [], profCurrentDraw: null, profIsDrawing: false,
+  profStartX: 0, profStartY: 0,
+  screenStream: null, screenInterval: null,
+  tool: 'arrow', color: '#ff4444',
+  annotations: [], currentAnnotation: null,
+  isDrawing: false, startX: 0, startY: 0,
+};
+
 // =====================================================================
 // RADIUM TELA — comunicação via Ably Realtime
 // CONFIGURAÇÃO: substitua SUA_CHAVE_ABLY abaixo

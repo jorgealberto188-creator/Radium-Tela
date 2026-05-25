@@ -475,6 +475,38 @@ function salvarChaveAbly() {
 })();
 
 // ===================== PROFESSOR =====================
+// ===================== UTILS =====================
+function showToast(msg, type='') {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.className = 'toast show ' + type;
+  setTimeout(() => t.className = 'toast', 2800);
+}
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('screen-' + id).classList.add('active');
+}
+function closeModal() { document.getElementById('modal-join').classList.remove('open'); }
+function gerarCodigo() {
+  return ['RAD','RX','TC','MR','US'][Math.floor(Math.random()*5)] + '-' + (1000+Math.floor(Math.random()*9000));
+}
+function copiarLink() {
+  const link = document.getElementById('link-text').textContent;
+  navigator.clipboard?.writeText(link).then(() => showToast('Link copiado!','success'));
+}
+function voltarHome() {
+  fecharWS();
+  if (state.screenStream) { state.screenStream.getTracks().forEach(t=>t.stop()); state.screenStream=null; }
+  if (state.screenInterval) { clearInterval(state.screenInterval); state.screenInterval=null; }
+  state.role=null; state.sessionCode=null;
+  showScreen('home');
+}
+function abrirNovaAba() {
+  const html = document.documentElement.outerHTML;
+  const blob = new Blob([html],{type:'text/html'});
+  window.open(URL.createObjectURL(blob),'_blank');
+}
+
+
 function entrarComoProfessor() {
   state.role = 'professor';
   state.sessionCode = gerarCodigo();

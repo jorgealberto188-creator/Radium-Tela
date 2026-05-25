@@ -388,10 +388,10 @@ function abrirWS(canal, onMsg) {
   ws.onmessage = (e) => {
     try {
       const msg = JSON.parse(e.data);
-      // ignora mensagens de sistema do PieSocket
       if (msg.event && msg.event !== 'message') return;
-      const data = msg.data || msg;
-      onMsg(data);
+      const raw = msg.data || msg;
+      const data = processMsg(raw);
+      if (data) onMsg(data);
     } catch(err) {}
   };
   ws.onerror = (e) => { console.error('WS error', e); };
@@ -399,15 +399,35 @@ function abrirWS(canal, onMsg) {
   return ws;
 }
 
+// Envia em chunks de 40KB (limite PieSocket ~64KB)
+const CHUNK_SIZE = 38000;
+const _chunks = {};
 function enviarWS(data) {
-  const str = JSON.stringify({ event: 'message', data });
-  if (state.ws && state.wsReady) {
-    state.ws.send(str);
-  } else if (state.ws) {
-    state.wsQueue.push(str);
+  const str = JSON.stringify(data);
+  if (str.length <= CHUNK_SIZE) { _wsSend({ event:'message', data }); return; }
+  const id = Math.random().toString(36).slice(2,8);
+  const total = Math.ceil(str.length / CHUNK_SIZE);
+  for (let i=0;i<total;i++) {
+    _wsSend({ event:'message', data:{ type:'chunk', id, i, total, slice:str.slice(i*CHUNK_SIZE,(i+1)*CHUNK_SIZE) } });
   }
 }
-
+function _wsSend(payload) {
+  const s = JSON.stringify(payload);
+  if (state.ws && state.wsReady) state.ws.send(s);
+  else if (state.ws) state.wsQueue.push(s);
+}
+function processMsg(data) {
+  if (!data || data.type !== 'chunk') return data;
+  const { id, i, total, slice } = data;
+  if (!_chunks[id]) _chunks[id] = { parts:[], total };
+  _chunks[id].parts[i] = slice;
+  if (_chunks[id].parts.filter(Boolean).length === total) {
+    const full = _chunks[id].parts.join('');
+    delete _chunks[id];
+    try { return JSON.parse(full); } catch(e) { return null; }
+  }
+  return null;
+}
 function fecharWS() {
   if (state.ws) { try { state.ws.close(); } catch(e) {} state.ws = null; }
 }
@@ -477,7 +497,7 @@ function carregarImagem(event) {
       if (h > maxH) { w = w * maxH/h; h = maxH; }
       const c = document.createElement('canvas'); c.width = w; c.height = h;
       c.getContext('2d').drawImage(img, 0, 0, w, h);
-      const dataUrl = c.toDataURL('image/jpeg', 0.85);
+      const dataUrl = c.toDataURL('image/jpeg', 0.75);
 
       document.getElementById('preview-image').src = dataUrl;
       document.getElementById('preview-image').style.display = 'block';
@@ -519,22 +539,24 @@ async function toggleScreenShare() {
     const captureC = document.createElement('canvas');
     const captureCtx = captureC.getContext('2d');
 
+    const MAX_W = 640, MAX_H = 480;
     const sendFrame = () => {
       if (!stream.active || !video.videoWidth) return;
-      captureC.width = video.videoWidth; captureC.height = video.videoHeight;
-      captureCtx.drawImage(video, 0, 0);
-      // Sobrepõe desenhos do professor
+      let w = video.videoWidth, h = video.videoHeight;
+      if (w > MAX_W) { h = Math.round(h * MAX_W/w); w = MAX_W; }
+      if (h > MAX_H) { w = Math.round(w * MAX_H/h); h = MAX_H; }
+      captureC.width = w; captureC.height = h;
+      captureCtx.drawImage(video, 0, 0, w, h);
       if (state.profDrawings.length > 0) {
         const box = document.getElementById('preview-box');
-        const sx = captureC.width / box.offsetWidth;
-        const sy = captureC.height / box.offsetHeight;
-        const tmpC = document.createElement('canvas'); tmpC.width = captureC.width; tmpC.height = captureC.height;
+        const sx = w / box.offsetWidth, sy = h / box.offsetHeight;
+        const tmpC = document.createElement('canvas'); tmpC.width = w; tmpC.height = h;
         const tmpCtx = tmpC.getContext('2d');
         tmpCtx.scale(sx, sy);
         state.profDrawings.forEach(d => drawShape(tmpCtx, d));
         captureCtx.drawImage(tmpC, 0, 0);
       }
-      const dataUrl = captureC.toDataURL('image/jpeg', 0.6);
+      const dataUrl = captureC.toDataURL('image/jpeg', 0.4);
       enviarWS({ type: 'screen', src: dataUrl });
     };
 

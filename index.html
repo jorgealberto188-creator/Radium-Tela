@@ -319,174 +319,28 @@
 
 <script>
 // =====================================================================
-// RADIUM TELA — comunicação via Ably (realtime confiável, gratuito)
+// RADIUM TELA — comunicação via Ably Realtime
+// CONFIGURAÇÃO: substitua SUA_CHAVE_ABLY abaixo
+// Crie grátis em: https://ably.com (plano Starter — 3M msgs/mês)
+// Após criar: vá em API Keys e copie a chave completa
 // =====================================================================
-// Ably free tier key — funciona para demos
-// Para produção: crie conta grátis em ably.com e use sua própria chave
-const ABLY_KEY = 'xVLyHw.oJ8zXA:QHBLvnSxbkjxCZ8g8F_VHPbJ0FV5zWbkk6FZajxOkSE';
 
-const state = {
-  role: null, sessionCode: null, nomeAluno: null,
-  ablyClient: null, _canal: null, _mqttPublish: null, wsReady: false, wsQueue: [],
-  viewers: {},
-  profDrawMode: false, profTool: 'pen', profColor: '#ff4444',
-  profDrawings: [], profCurrentDraw: null, profIsDrawing: false,
-  profStartX: 0, profStartY: 0,
-  screenStream: null, screenInterval: null,
-  tool: 'arrow', color: '#ff4444',
-  annotations: [], currentAnnotation: null,
-  isDrawing: false, startX: 0, startY: 0,
-  _intervals: [],
-};
+const ABLY_API_KEY = window.ABLY_KEY || 'COLOQUE_SUA_CHAVE_ABLY_AQUI';
 
-// ===================== UTILS =====================
-function showToast(msg, type='') {
-  const t = document.getElementById('toast');
-  t.textContent = msg; t.className = 'toast show ' + type;
-  setTimeout(() => t.className = 'toast', 2800);
-}
-function showScreen(id) {
-  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-  document.getElementById('screen-' + id).classList.add('active');
-}
-function closeModal() { document.getElementById('modal-join').classList.remove('open'); }
-function gerarCodigo() {
-  return ['RAD','RX','TC','MR','US'][Math.floor(Math.random()*5)] + '-' + (1000+Math.floor(Math.random()*9000));
-}
-function copiarLink() {
-  const link = document.getElementById('link-text').textContent;
-  navigator.clipboard?.writeText(link).then(() => showToast('Link copiado!','success'));
-}
-function voltarHome() {
-  fecharWS();
-  if (state.screenStream) { state.screenStream.getTracks().forEach(t => t.stop()); state.screenStream = null; }
-  if (state.screenInterval) { clearInterval(state.screenInterval); state.screenInterval = null; }
-  state._intervals.forEach(clearInterval); state._intervals = [];
-  state.role = null; state.sessionCode = null;
-  showScreen('home');
-}
-function abrirNovaAba() {
-  const html = document.documentElement.outerHTML;
-  const blob = new Blob([html], {type:'text/html'});
-  window.open(URL.createObjectURL(blob), '_blank');
-}
-
-// ===================== WEBSOCKET via PieSocket =====================
-function abrirWS(canal, onMsg) {
-  state._canal = canal;
-  state.wsReady = false;
-  state.wsQueue = [];
-
-  // HiveMQ público — MQTT sobre WebSocket, padrão industrial
-  const clientId = 'radium_' + Math.random().toString(36).slice(2, 10);
-  const ws = new WebSocket(`wss://broker.hivemq.com:8884/mqtt`);
-  ws.binaryType = 'arraybuffer';
-  state.ablyClient = ws;
-
-  const topic = 'radiumtela/' + canal;
-  const encoder = new TextEncoder();
-  const decoder = new TextDecoder();
-
-  // Monta pacotes MQTT manualmente (protocolo simples)
-  function mqttConnect() {
-    // CONNECT packet
-    const cid = encoder.encode(clientId);
-    const buf = new Uint8Array([
-      0x10, // CONNECT
-      12 + 2 + cid.length, // remaining length
-      0x00, 0x04, 0x4D, 0x51, 0x54, 0x54, // "MQTT"
-      0x04, // Protocol level 4 (3.1.1)
-      0x02, // Connect flags: CleanSession
-      0x00, 0x3C, // Keep alive: 60s
-      0x00, cid.length, ...cid
-    ]);
-    ws.send(buf);
-  }
-
-  function mqttSubscribe() {
-    const t = encoder.encode(topic);
-    const msgId = 1;
-    const buf = new Uint8Array([
-      0x82, // SUBSCRIBE
-      2 + 2 + t.length + 1, // remaining
-      0x00, msgId, // message id
-      0x00, t.length, ...t,
-      0x00 // QoS 0
-    ]);
-    ws.send(buf);
-  }
-
-  function mqttPublish(payload) {
-    const t = encoder.encode(topic);
-    const p = encoder.encode(payload);
-    const remLen = 2 + t.length + p.length;
-    const buf = new Uint8Array([
-      0x30, // PUBLISH QoS 0
-      remLen,
-      0x00, t.length, ...t,
-      ...p
-    ]);
-    ws.send(buf);
-  }
-
-  ws.onopen = () => {
-    mqttConnect();
-  };
-
-  ws.onmessage = (e) => {
-    const buf = new Uint8Array(e.data);
-    const type = buf[0] >> 4;
-    if (type === 2) { // CONNACK
-      state.wsReady = true;
-      mqttSubscribe();
-      state.wsQueue.forEach(m => mqttPublish(m));
-      state.wsQueue = [];
-    } else if (type === 3) { // PUBLISH
-      // Parse topic length
-      let i = 1;
-      // skip remaining length (variable)
-      while (buf[i] & 0x80) i++;
-      i++;
-      const tLen = (buf[i] << 8) | buf[i+1]; i += 2;
-      i += tLen; // skip topic
-      const payload = decoder.decode(buf.slice(i));
-      try {
-        const raw = JSON.parse(payload);
-        const data = processMsg(raw);
-        if (data) onMsg(data);
-      } catch(err) {}
-    }
-  };
-
-  ws.onerror = () => { state.wsReady = false; };
-  ws.onclose = () => { state.wsReady = false; };
-
-  // Store publish function for use in _wsSend
-  state._mqttPublish = mqttPublish;
-}
-
-// Envia em chunks de 40KB (limite PieSocket ~64KB)
-const CHUNK_SIZE = 38000;
+// ---- Chunks para imagens grandes ----
+const CHUNK_SIZE = 60000;
 const _chunks = {};
+
 function enviarWS(data) {
   const str = JSON.stringify(data);
-  if (str.length <= CHUNK_SIZE) { _wsSend({ event:'message', data }); return; }
+  if (str.length <= CHUNK_SIZE) { _ablyPublish(data); return; }
   const id = Math.random().toString(36).slice(2,8);
   const total = Math.ceil(str.length / CHUNK_SIZE);
-  for (let i=0;i<total;i++) {
-    _wsSend({ event:'message', data:{ type:'chunk', id, i, total, slice:str.slice(i*CHUNK_SIZE,(i+1)*CHUNK_SIZE) } });
+  for (let i = 0; i < total; i++) {
+    _ablyPublish({ type:'chunk', id, i, total, slice: str.slice(i*CHUNK_SIZE, (i+1)*CHUNK_SIZE) });
   }
 }
-function _wsSend(payload) {
-  const data = payload.data !== undefined ? payload.data : payload;
-  const str = JSON.stringify(data);
-  if (state._mqttPublish && state.wsReady) {
-    state._mqttPublish(str);
-  } else {
-    state.wsQueue = state.wsQueue || [];
-    state.wsQueue.push(str);
-  }
-}
+
 function processMsg(data) {
   if (!data || data.type !== 'chunk') return data;
   const { id, i, total, slice } = data;
@@ -499,11 +353,88 @@ function processMsg(data) {
   }
   return null;
 }
+
+let _ablyRt = null;
+let _ablyCh = null;
+
+function abrirWS(canal, onMsg) {
+  state._canal = canal;
+  state.wsReady = false;
+
+  // Verifica se chave foi configurada
+  if (ABLY_API_KEY === 'COLOQUE_SUA_CHAVE_ABLY_AQUI') {
+    mostrarAvisoChave();
+    return;
+  }
+
+  const script = document.createElement('script');
+  script.src = 'https://cdn.ably.com/lib/ably.min-2.js';
+  script.onload = () => {
+    _ablyRt = new Ably.Realtime({ key: ABLY_API_KEY });
+    _ablyRt.connection.on('connected', () => {
+      state.wsReady = true;
+      state.wsQueue.forEach(d => _ablyCh.publish('msg', d));
+      state.wsQueue = [];
+    });
+    _ablyCh = _ablyRt.channels.get('radiumtela_' + canal);
+    _ablyCh.subscribe('msg', (message) => {
+      try {
+        const data = processMsg(message.data);
+        if (data) onMsg(data);
+      } catch(e) {}
+    });
+  };
+  document.head.appendChild(script);
+}
+
+function _ablyPublish(data) {
+  if (_ablyCh && state.wsReady) _ablyCh.publish('msg', data);
+  else { state.wsQueue = state.wsQueue || []; state.wsQueue.push(data); }
+}
+
 function fecharWS() {
-  if (state.ablyClient) { try { state.ablyClient.close(); } catch(e) {} state.ablyClient = null; }
-  state._mqttPublish = null;
+  if (_ablyRt) { try { _ablyRt.close(); } catch(e) {} _ablyRt = null; _ablyCh = null; }
   state.wsReady = false;
 }
+
+function mostrarAvisoChave() {
+  document.body.insertAdjacentHTML('beforeend', `
+    <div style="position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:9999;display:flex;align-items:center;justify-content:center;padding:1.5rem;">
+      <div style="background:#111720;border:1px solid rgba(0,212,170,0.3);border-radius:18px;padding:2rem;max-width:500px;width:100%;font-family:'DM Sans',sans-serif;">
+        <div style="font-family:'Syne',sans-serif;font-size:1.3rem;font-weight:800;color:#00d4aa;margin-bottom:1rem;">⚙️ Configure sua chave Ably</div>
+        <p style="font-size:0.85rem;color:#6b7a99;line-height:1.7;margin-bottom:1.2rem;">
+          Para transmitir imagens entre dispositivos diferentes, o Radium Tela precisa de uma chave de comunicação gratuita do Ably.
+        </p>
+        <ol style="font-size:0.82rem;color:#e8edf5;line-height:2.2;padding-left:1.2rem;margin-bottom:1.5rem;">
+          <li>Acesse <a href="https://ably.com" target="_blank" style="color:#4f8ef7;">ably.com</a> e crie uma conta gratuita</li>
+          <li>Crie um App novo → vá em <strong>API Keys</strong></li>
+          <li>Copie a chave (formato: <code style="background:#1a2333;padding:2px 6px;border-radius:4px;font-size:0.78rem;">xxxx.yyyy:zzzz</code>)</li>
+          <li>Cole abaixo e clique em Salvar</li>
+        </ol>
+        <input id="ably-key-input" type="text" placeholder="Cole sua chave Ably aqui (xxxx.yyyy:zzzz)"
+          style="width:100%;background:#0a0e14;border:1px solid rgba(79,142,247,0.4);border-radius:10px;padding:0.75rem 1rem;color:#e8edf5;font-family:'DM Mono',monospace;font-size:0.82rem;outline:none;margin-bottom:0.8rem;" />
+        <button onclick="salvarChaveAbly()"
+          style="width:100%;background:#00d4aa;color:#000;border:none;border-radius:10px;padding:0.75rem;font-family:'Syne',sans-serif;font-weight:700;font-size:0.9rem;cursor:pointer;">
+          Salvar e conectar →
+        </button>
+        <p style="font-size:0.72rem;color:#3d4f6e;margin-top:0.8rem;text-align:center;">A chave fica salva no seu navegador. Gratuito para até 3 milhões de mensagens/mês.</p>
+      </div>
+    </div>
+  `);
+}
+
+function salvarChaveAbly() {
+  const key = document.getElementById('ably-key-input').value.trim();
+  if (!key || !key.includes(':')) { alert('Chave inválida. Formato: xxxx.yyyy:zzzz'); return; }
+  localStorage.setItem('radiumtela_ably_key', key);
+  location.reload();
+}
+
+// Carrega chave salva
+(function() {
+  const saved = localStorage.getItem('radiumtela_ably_key');
+  if (saved) window.ABLY_KEY = saved;
+})();
 
 // ===================== PROFESSOR =====================
 function entrarComoProfessor() {

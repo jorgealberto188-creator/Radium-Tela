@@ -170,6 +170,28 @@
   </div>
 </div>
 
+<!-- MODAL ABLY KEY -->
+<div class="modal-overlay" id="modal-ably">
+  <div class="modal" style="max-width:440px;">
+    <h3 style="color:var(--accent);">⚙️ Configure a chave Ably</h3>
+    <p style="font-size:0.82rem;color:var(--text-muted);line-height:1.6;margin-bottom:1rem;">
+      Para transmitir imagens entre dispositivos, o Radium Tela precisa de uma chave gratuita do Ably.
+    </p>
+    <ol style="font-size:0.8rem;color:var(--text-muted);line-height:2;padding-left:1.1rem;margin-bottom:1rem;">
+      <li>Acesse <a href="https://ably.com" target="_blank" style="color:var(--accent2);">ably.com</a> → crie conta grátis</li>
+      <li>Crie um App → clique em <strong style="color:var(--text);">API Keys</strong></li>
+      <li>Copie a chave (formato: <code style="background:var(--surface2);padding:1px 5px;border-radius:4px;font-size:0.75rem;">xxxx.yyyy:zzzz</code>)</li>
+      <li>Cole abaixo e clique em Salvar</li>
+    </ol>
+    <input type="text" id="ably-key-input" placeholder="Cole sua chave Ably (xxxx.yyyy:zzzz)" style="font-family:var(--font-mono);font-size:0.82rem;"/>
+    <div class="modal-actions">
+      <button class="btn secondary" onclick="document.getElementById('modal-ably').classList.remove('open')">Agora não</button>
+      <button class="btn" onclick="salvarChaveAbly()">Salvar e conectar →</button>
+    </div>
+    <p style="font-size:0.72rem;color:var(--text-dim);margin-top:0.8rem;text-align:center;">Salvo no navegador · 3M msgs/mês grátis</p>
+  </div>
+</div>
+
 <!-- ======= HOME ======= -->
 <div class="screen active" id="screen-home">
   <div class="home-content">
@@ -195,7 +217,16 @@
       <button onclick="abrirNovaAba()" style="background:var(--accent4);color:#000;border:none;border-radius:8px;padding:0.55rem 1.1rem;font-family:var(--font-display);font-weight:700;font-size:0.82rem;cursor:pointer;width:100%;">🚀 Abrir Radium Tela em nova aba</button>
     </div>
 
-    <p style="font-size:0.72rem;color:var(--text-dim);margin-top:2rem;font-family:var(--font-mono);letter-spacing:0.06em;">Desenvolvido por <span style="color:var(--accent);">Jorge Alberto</span></p>
+    <div id="ably-config-bar" style="display:none;margin-top:1.2rem;background:rgba(255,107,107,0.1);border:1px solid rgba(255,107,107,0.35);border-radius:12px;padding:0.9rem 1.1rem;">
+      <p style="font-size:0.8rem;color:#ff6b6b;font-weight:600;margin-bottom:0.4rem;">⚠️ Chave de comunicação não configurada</p>
+      <p style="font-size:0.75rem;color:var(--text-muted);margin-bottom:0.8rem;">O app precisa de uma chave Ably gratuita para transmitir imagens entre dispositivos.</p>
+      <button onclick="mostrarAvisoChave()" style="width:100%;background:#ff6b6b;color:#fff;border:none;border-radius:8px;padding:0.55rem 1rem;font-family:var(--font-display);font-weight:700;font-size:0.82rem;cursor:pointer;">⚙️ Configurar agora (5 min)</button>
+    </div>
+    <div id="ably-ok-bar" style="display:none;margin-top:1.2rem;background:rgba(0,212,170,0.08);border:1px solid rgba(0,212,170,0.25);border-radius:12px;padding:0.7rem 1rem;display:flex;align-items:center;gap:8px;">
+      <span style="font-size:0.78rem;color:var(--accent);">✅ Comunicação configurada</span>
+      <button onclick="mostrarAvisoChave()" style="margin-left:auto;background:none;border:1px solid rgba(0,212,170,0.3);border-radius:6px;padding:0.2rem 0.6rem;color:var(--accent);cursor:pointer;font-size:0.72rem;">Trocar chave</button>
+    </div>
+    <p style="font-size:0.72rem;color:var(--text-dim);margin-top:1.5rem;font-family:var(--font-mono);letter-spacing:0.06em;">Desenvolvido por <span style="color:var(--accent);">Jorge Alberto</span></p>
   </div>
 </div>
 
@@ -398,29 +429,7 @@ function fecharWS() {
 }
 
 function mostrarAvisoChave() {
-  document.body.insertAdjacentHTML('beforeend', `
-    <div style="position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:9999;display:flex;align-items:center;justify-content:center;padding:1.5rem;">
-      <div style="background:#111720;border:1px solid rgba(0,212,170,0.3);border-radius:18px;padding:2rem;max-width:500px;width:100%;font-family:'DM Sans',sans-serif;">
-        <div style="font-family:'Syne',sans-serif;font-size:1.3rem;font-weight:800;color:#00d4aa;margin-bottom:1rem;">⚙️ Configure sua chave Ably</div>
-        <p style="font-size:0.85rem;color:#6b7a99;line-height:1.7;margin-bottom:1.2rem;">
-          Para transmitir imagens entre dispositivos diferentes, o Radium Tela precisa de uma chave de comunicação gratuita do Ably.
-        </p>
-        <ol style="font-size:0.82rem;color:#e8edf5;line-height:2.2;padding-left:1.2rem;margin-bottom:1.5rem;">
-          <li>Acesse <a href="https://ably.com" target="_blank" style="color:#4f8ef7;">ably.com</a> e crie uma conta gratuita</li>
-          <li>Crie um App novo → vá em <strong>API Keys</strong></li>
-          <li>Copie a chave (formato: <code style="background:#1a2333;padding:2px 6px;border-radius:4px;font-size:0.78rem;">xxxx.yyyy:zzzz</code>)</li>
-          <li>Cole abaixo e clique em Salvar</li>
-        </ol>
-        <input id="ably-key-input" type="text" placeholder="Cole sua chave Ably aqui (xxxx.yyyy:zzzz)"
-          style="width:100%;background:#0a0e14;border:1px solid rgba(79,142,247,0.4);border-radius:10px;padding:0.75rem 1rem;color:#e8edf5;font-family:'DM Mono',monospace;font-size:0.82rem;outline:none;margin-bottom:0.8rem;" />
-        <button onclick="salvarChaveAbly()"
-          style="width:100%;background:#00d4aa;color:#000;border:none;border-radius:10px;padding:0.75rem;font-family:'Syne',sans-serif;font-weight:700;font-size:0.9rem;cursor:pointer;">
-          Salvar e conectar →
-        </button>
-        <p style="font-size:0.72rem;color:#3d4f6e;margin-top:0.8rem;text-align:center;">A chave fica salva no seu navegador. Gratuito para até 3 milhões de mensagens/mês.</p>
-      </div>
-    </div>
-  `);
+  document.getElementById('modal-ably').classList.add('open');
 }
 
 function salvarChaveAbly() {
@@ -430,10 +439,25 @@ function salvarChaveAbly() {
   location.reload();
 }
 
-// Carrega chave salva
+// Carrega chave salva e atualiza UI da home
 (function() {
   const saved = localStorage.getItem('radiumtela_ably_key');
-  if (saved) window.ABLY_KEY = saved;
+  if (saved) {
+    window.ABLY_KEY = saved;
+    document.addEventListener('DOMContentLoaded', () => {
+      const ok = document.getElementById('ably-ok-bar');
+      if (ok) { ok.style.display = 'flex'; }
+      const cfg = document.getElementById('ably-config-bar');
+      if (cfg) cfg.style.display = 'none';
+    });
+  } else {
+    document.addEventListener('DOMContentLoaded', () => {
+      const cfg = document.getElementById('ably-config-bar');
+      if (cfg) cfg.style.display = 'block';
+      const ok = document.getElementById('ably-ok-bar');
+      if (ok) ok.style.display = 'none';
+    });
+  }
 })();
 
 // ===================== PROFESSOR =====================
@@ -454,22 +478,26 @@ function entrarComoProfessor() {
   try { new QRCode(qrEl, {text: joinUrl, width:200, height:200, colorDark:'#000', colorLight:'#fff'}); }
   catch(e) { qrEl.innerHTML = '<span style="color:#999;font-size:0.75rem">QR indisponível</span>'; }
 
-  // Abre WebSocket no canal da sessão
+  // Abre tela do professor PRIMEIRO
+  showScreen('professor');
+  setTimeout(() => {
+    const box = document.getElementById('preview-box');
+    const c = document.getElementById('prof-draw-canvas');
+    c.width = box.offsetWidth; c.height = box.offsetHeight;
+  }, 100);
+
+  // Conecta ao canal (pode mostrar aviso de chave se não configurado)
   abrirWS('radiumtela_' + state.sessionCode, (data) => {
     if (data.type === 'join') {
       state.viewers[data.nome] = Date.now();
       atualizarViewers();
       showToast('🎓 ' + data.nome + ' entrou na sessão');
-      // Reenvia imagem atual para o novo aluno
       setTimeout(() => reenviarEstadoAtual(), 500);
     } else if (data.type === 'leave') {
       delete state.viewers[data.nome];
       atualizarViewers();
     }
   });
-
-  showScreen('professor');
-  setTimeout(() => { const box = document.getElementById('preview-box'); const c = document.getElementById('prof-draw-canvas'); c.width = box.offsetWidth; c.height = box.offsetHeight; }, 100);
 }
 
 function atualizarViewers() {
@@ -862,6 +890,20 @@ document.addEventListener('keydown', e => {
 try { if (window.self !== window.top) document.getElementById('iframe-warning').style.display='block'; } catch(e) { document.getElementById('iframe-warning').style.display='block'; }
 
 checkUrlSession();
+
+// Atualiza barra de config na home imediatamente
+(function() {
+  const saved = localStorage.getItem('radiumtela_ably_key');
+  const cfg = document.getElementById('ably-config-bar');
+  const ok = document.getElementById('ably-ok-bar');
+  if (saved) {
+    if (cfg) cfg.style.display = 'none';
+    if (ok) ok.style.display = 'flex';
+  } else {
+    if (cfg) cfg.style.display = 'block';
+    if (ok) ok.style.display = 'none';
+  }
+})();
 </script>
 </body>
 </html>

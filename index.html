@@ -114,8 +114,11 @@
   .aluno-actions{margin-left:auto;display:flex;gap:6px;}
   .aluno-body{display:flex;flex-direction:column;height:calc(100vh - 50px);}
   .image-viewer{flex:1;position:relative;overflow:hidden;background:#050709;display:flex;align-items:center;justify-content:center;}
-  #aluno-image{max-width:100%;max-height:100%;object-fit:contain;position:relative;z-index:1;user-select:none;display:none;}
+  #aluno-image{max-width:100%;max-height:100%;object-fit:contain;position:relative;z-index:1;user-select:none;display:none;transform-origin:center center;will-change:transform;}
   #annotation-canvas{position:absolute;top:0;left:0;width:100%;height:100%;z-index:2;cursor:crosshair;}
+  .image-viewer.zoomed{cursor:grab;}
+  .image-viewer.zoomed:active{cursor:grabbing;}
+  .zoom-chip{font-family:var(--font-mono);font-size:0.72rem;color:var(--accent2);min-width:44px;text-align:center;}
   .waiting-msg{text-align:center;color:var(--text-muted);display:flex;flex-direction:column;align-items:center;gap:1rem;padding:2rem;}
   .waiting-msg .icon{font-size:3rem;}
   .waiting-msg p{font-size:0.9rem;line-height:1.6;}
@@ -329,6 +332,11 @@
       <canvas id="annotation-canvas"></canvas>
     </div>
     <div class="annotation-bar">
+      <button class="tool-btn" onclick="setAlunoZoom(state.alunoZoom + 0.25)">🔍 +</button>
+      <button class="tool-btn" onclick="setAlunoZoom(state.alunoZoom - 0.25)">🔍 -</button>
+      <span class="zoom-chip" id="zoom-label">100%</span>
+      <button class="tool-btn" onclick="resetAlunoZoom()">Ajustar</button>
+      <div class="divider"></div>
       <span style="font-size:0.74rem;color:var(--text-dim);white-space:nowrap;">Anotar:</span>
       <button class="tool-btn active" id="tool-seta" onclick="setTool('arrow')">↗ Seta</button>
       <button class="tool-btn" id="tool-caneta" onclick="setTool('pen')">✏️ Caneta</button>
@@ -361,6 +369,8 @@ const state = {
   tool: 'arrow', color: '#ff4444',
   annotations: [], currentAnnotation: null,
   isDrawing: false, startX: 0, startY: 0,
+  alunoZoom: 1, alunoPanX: 0, alunoPanY: 0, alunoPanning: false,
+  alunoPanStartX: 0, alunoPanStartY: 0, alunoPanBaseX: 0, alunoPanBaseY: 0,
 };
 
 // =====================================================================
@@ -850,6 +860,7 @@ function entrarSessao() {
       }
     } else if (data.type === 'clear') {
       document.getElementById('aluno-image').style.display = 'none';
+      resetAlunoZoom();
       document.getElementById('waiting-msg').style.display = 'flex';
       document.getElementById('waiting-text').textContent = 'Aguardando o professor compartilhar...';
       limparAnotacoes();
@@ -879,9 +890,65 @@ function checkUrlSession() {
 const aCanvas = document.getElementById('annotation-canvas');
 const aCtx = aCanvas.getContext('2d');
 
+function clampAlunoPan() {
+  const viewer = document.getElementById('image-viewer');
+  const maxX = Math.max(0, viewer.offsetWidth * (state.alunoZoom - 1) / 2);
+  const maxY = Math.max(0, viewer.offsetHeight * (state.alunoZoom - 1) / 2);
+  state.alunoPanX = Math.max(-maxX, Math.min(maxX, state.alunoPanX));
+  state.alunoPanY = Math.max(-maxY, Math.min(maxY, state.alunoPanY));
+}
+
+function aplicarAlunoZoom() {
+  const img = document.getElementById('aluno-image');
+  const viewer = document.getElementById('image-viewer');
+  const label = document.getElementById('zoom-label');
+  clampAlunoPan();
+  img.style.transform = `translate(${state.alunoPanX}px, ${state.alunoPanY}px) scale(${state.alunoZoom})`;
+  viewer.classList.toggle('zoomed', state.alunoZoom > 1);
+  aCanvas.style.pointerEvents = state.alunoZoom > 1 ? 'none' : 'auto';
+  if (label) label.textContent = Math.round(state.alunoZoom * 100) + '%';
+}
+
+function setAlunoZoom(zoom) {
+  state.alunoZoom = Math.max(1, Math.min(4, Math.round(zoom * 4) / 4));
+  if (state.alunoZoom === 1) { state.alunoPanX = 0; state.alunoPanY = 0; }
+  aplicarAlunoZoom();
+}
+
+function resetAlunoZoom() {
+  state.alunoZoom = 1; state.alunoPanX = 0; state.alunoPanY = 0;
+  aplicarAlunoZoom();
+}
+
+function getViewerPoint(e) {
+  const touch = e.touches?.[0] || e;
+  return { x: touch.clientX, y: touch.clientY };
+}
+
+function startAlunoPan(e) {
+  if (state.alunoZoom <= 1) return;
+  const p = getViewerPoint(e);
+  state.alunoPanning = true;
+  state.alunoPanStartX = p.x; state.alunoPanStartY = p.y;
+  state.alunoPanBaseX = state.alunoPanX; state.alunoPanBaseY = state.alunoPanY;
+  e.preventDefault();
+}
+
+function moveAlunoPan(e) {
+  if (!state.alunoPanning) return;
+  const p = getViewerPoint(e);
+  state.alunoPanX = state.alunoPanBaseX + (p.x - state.alunoPanStartX);
+  state.alunoPanY = state.alunoPanBaseY + (p.y - state.alunoPanStartY);
+  aplicarAlunoZoom();
+  e.preventDefault();
+}
+
+function endAlunoPan() { state.alunoPanning = false; }
+
 function redimensionarCanvas() {
   const viewer = document.getElementById('image-viewer');
   aCanvas.width = viewer.offsetWidth; aCanvas.height = viewer.offsetHeight;
+  aplicarAlunoZoom();
   redesenharAnotacoes();
 }
 function setTool(tool) {
@@ -906,7 +973,23 @@ aCanvas.addEventListener('touchstart', e=>{e.preventDefault();startDraw(e);},{pa
 aCanvas.addEventListener('touchmove', e=>{e.preventDefault();moveDraw(e);},{passive:false});
 aCanvas.addEventListener('touchend', endDraw);
 
+const imageViewer = document.getElementById('image-viewer');
+imageViewer.addEventListener('mousedown', startAlunoPan);
+imageViewer.addEventListener('mousemove', moveAlunoPan);
+imageViewer.addEventListener('mouseup', endAlunoPan);
+imageViewer.addEventListener('mouseleave', endAlunoPan);
+imageViewer.addEventListener('touchstart', startAlunoPan, {passive:false});
+imageViewer.addEventListener('touchmove', moveAlunoPan, {passive:false});
+imageViewer.addEventListener('touchend', endAlunoPan);
+imageViewer.addEventListener('wheel', e => {
+  const img = document.getElementById('aluno-image');
+  if (!img.src || img.style.display === 'none') return;
+  setAlunoZoom(state.alunoZoom + (e.deltaY < 0 ? 0.25 : -0.25));
+  e.preventDefault();
+}, {passive:false});
+
 function startDraw(e) {
+  if (state.alunoZoom > 1) return;
   const pos=getAPos(e); state.isDrawing=true; state.startX=pos.x; state.startY=pos.y;
   const size=+document.getElementById('size-range').value;
   if (state.tool==='pen') { state.currentAnnotation={type:'pen',color:state.color,size,points:[pos]}; }

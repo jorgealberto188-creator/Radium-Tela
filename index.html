@@ -2,161 +2,153 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <title>Radium Tela — Ensino em Tempo Real</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <style>
   :root {
-    --bg: #0a0e14;
-    --surface: #111720;
-    --surface2: #1a2333;
-    --border: rgba(255,255,255,0.08);
-    --accent: #00d4aa;
-    --accent2: #4f8ef7;
-    --accent3: #ff6b6b;
-    --accent4: #f5a623;
-    --text: #e8edf5;
-    --text-muted: #6b7a99;
-    --text-dim: #3d4f6e;
-    --font-display: 'Syne', sans-serif;
-    --font-body: 'DM Sans', sans-serif;
-    --font-mono: 'DM Mono', monospace;
+    --bg:#0a0e14; --surface:#111720; --surface2:#1a2333;
+    --border:rgba(255,255,255,0.08); --accent:#00d4aa; --accent2:#4f8ef7;
+    --accent3:#ff6b6b; --accent4:#f5a623;
+    --text:#e8edf5; --text-muted:#6b7a99; --text-dim:#3d4f6e;
+    --font-display:'Syne',sans-serif; --font-body:'DM Sans',sans-serif; --font-mono:'DM Mono',monospace;
   }
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-  body { background: var(--bg); color: var(--text); font-family: var(--font-body); min-height: 100vh; overflow-x: hidden; }
-
-  .screen { display: none; min-height: 100vh; }
-  .screen.active { display: flex; flex-direction: column; }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{background:var(--bg);color:var(--text);font-family:var(--font-body);min-height:100vh;overflow-x:hidden;}
+  .screen{display:none;min-height:100vh;}
+  .screen.active{display:flex;flex-direction:column;}
 
   /* HOME */
-  #screen-home { align-items: center; justify-content: center; padding: 2rem; position: relative; overflow: hidden; }
-  #screen-home::before { content:''; position:absolute; width:600px; height:600px; border-radius:50%; background:radial-gradient(circle,rgba(0,212,170,0.06) 0%,transparent 70%); top:-200px; right:-200px; pointer-events:none; }
-  #screen-home::after { content:''; position:absolute; width:400px; height:400px; border-radius:50%; background:radial-gradient(circle,rgba(79,142,247,0.05) 0%,transparent 70%); bottom:-100px; left:-100px; pointer-events:none; }
-  .home-content { text-align:center; max-width:480px; position:relative; z-index:1; }
-  .logo { font-family:var(--font-display); font-size:2.8rem; font-weight:800; letter-spacing:-0.03em; line-height:1; margin-bottom:0.5rem; }
-  .logo span { color:var(--accent); }
-  .tagline { font-size:0.9rem; color:var(--text-muted); letter-spacing:0.12em; text-transform:uppercase; font-family:var(--font-mono); margin-bottom:3rem; }
-  .home-cards { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:2rem; }
-  .role-card { background:var(--surface); border:1px solid var(--border); border-radius:16px; padding:1.8rem 1.2rem; cursor:pointer; transition:all 0.2s ease; text-align:center; }
-  .role-card:hover { border-color:var(--accent); background:var(--surface2); transform:translateY(-2px); }
-  .role-card .role-icon { font-size:2rem; margin-bottom:0.8rem; display:block; }
-  .role-card .role-title { font-family:var(--font-display); font-size:1rem; font-weight:700; color:var(--text); margin-bottom:0.3rem; }
-  .role-card .role-sub { font-size:0.75rem; color:var(--text-muted); }
-  .role-card.professor { border-color:rgba(0,212,170,0.3); }
-  .role-card.professor:hover { border-color:var(--accent); }
-  .role-card.aluno { border-color:rgba(79,142,247,0.3); }
-  .role-card.aluno:hover { border-color:var(--accent2); }
+  #screen-home{align-items:center;justify-content:center;padding:2rem;position:relative;overflow:hidden;}
+  #screen-home::before{content:'';position:absolute;width:600px;height:600px;border-radius:50%;background:radial-gradient(circle,rgba(0,212,170,0.06) 0%,transparent 70%);top:-200px;right:-200px;pointer-events:none;}
+  #screen-home::after{content:'';position:absolute;width:400px;height:400px;border-radius:50%;background:radial-gradient(circle,rgba(79,142,247,0.05) 0%,transparent 70%);bottom:-100px;left:-100px;pointer-events:none;}
+  .home-content{text-align:center;max-width:480px;position:relative;z-index:1;}
+  .logo{font-family:var(--font-display);font-size:2.8rem;font-weight:800;letter-spacing:-0.03em;line-height:1;margin-bottom:0.5rem;}
+  .logo span{color:var(--accent);}
+  .tagline{font-size:0.9rem;color:var(--text-muted);letter-spacing:0.12em;text-transform:uppercase;font-family:var(--font-mono);margin-bottom:3rem;}
+  .home-cards{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:2rem;}
+  .role-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:1.8rem 1.2rem;cursor:pointer;transition:all 0.2s;text-align:center;}
+  .role-card:hover{border-color:var(--accent);background:var(--surface2);transform:translateY(-2px);}
+  .role-card .role-icon{font-size:2rem;margin-bottom:0.8rem;display:block;}
+  .role-card .role-title{font-family:var(--font-display);font-size:1rem;font-weight:700;color:var(--text);margin-bottom:0.3rem;}
+  .role-card .role-sub{font-size:0.75rem;color:var(--text-muted);}
+  .role-card.professor{border-color:rgba(0,212,170,0.3);}
+  .role-card.aluno{border-color:rgba(79,142,247,0.3);}
 
   /* BUTTONS */
-  .btn { background:var(--accent); color:#000; border:none; border-radius:10px; padding:0.7rem 1.4rem; font-family:var(--font-display); font-weight:700; font-size:0.85rem; cursor:pointer; transition:all 0.15s ease; white-space:nowrap; }
-  .btn:hover { background:#00f0c2; transform:scale(1.02); }
-  .btn:active { transform:scale(0.98); }
-  .btn.secondary { background:transparent; color:var(--text); border:1px solid var(--border); }
-  .btn.secondary:hover { background:var(--surface2); border-color:var(--text-muted); }
-  .btn.blue { background:var(--accent2); color:#fff; }
-  .btn.orange { background:var(--accent4); color:#000; }
+  .btn{background:var(--accent);color:#000;border:none;border-radius:10px;padding:0.7rem 1.4rem;font-family:var(--font-display);font-weight:700;font-size:0.85rem;cursor:pointer;transition:all 0.15s;white-space:nowrap;}
+  .btn:hover{filter:brightness(1.1);transform:scale(1.02);}
+  .btn.secondary{background:transparent;color:var(--text);border:1px solid var(--border);}
+  .btn.secondary:hover{background:var(--surface2);}
+  .btn.blue{background:var(--accent2);color:#fff;}
+
+  /* WARNING BOX */
+  .warn-box{background:rgba(245,166,35,0.1);border:1px solid rgba(245,166,35,0.35);border-radius:12px;padding:1rem 1.2rem;margin-top:1.5rem;text-align:left;}
+  .warn-box p{font-size:0.8rem;color:var(--text-muted);margin-bottom:0.7rem;line-height:1.5;}
+  .warn-box strong{color:var(--accent4);}
 
   /* PROFESSOR */
-  #screen-professor { padding:0; }
-  .prof-header { background:var(--surface); border-bottom:1px solid var(--border); padding:0.8rem 1.2rem; display:flex; align-items:center; gap:0.8rem; flex-wrap:wrap; }
-  .prof-logo { font-family:var(--font-display); font-weight:800; font-size:1.1rem; color:var(--accent); letter-spacing:-0.02em; }
-  .session-badge { font-family:var(--font-mono); font-size:0.75rem; background:rgba(0,212,170,0.1); color:var(--accent); border:1px solid rgba(0,212,170,0.3); padding:0.3rem 0.8rem; border-radius:6px; letter-spacing:0.1em; }
-  .live-dot { width:8px; height:8px; border-radius:50%; background:var(--accent3); animation:pulse 1.5s infinite; display:inline-block; margin-right:4px; }
-  @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.5;transform:scale(1.3)} }
-  .viewers-count { font-size:0.8rem; color:var(--text-muted); display:flex; align-items:center; gap:6px; }
-  .header-actions { margin-left:auto; display:flex; gap:8px; align-items:center; }
+  #screen-professor{padding:0;}
+  .prof-header{background:var(--surface);border-bottom:1px solid var(--border);padding:0.8rem 1.2rem;display:flex;align-items:center;gap:0.8rem;flex-wrap:wrap;}
+  .prof-logo{font-family:var(--font-display);font-weight:800;font-size:1.1rem;color:var(--accent);}
+  .session-badge{font-family:var(--font-mono);font-size:0.75rem;background:rgba(0,212,170,0.1);color:var(--accent);border:1px solid rgba(0,212,170,0.3);padding:0.3rem 0.8rem;border-radius:6px;letter-spacing:0.1em;}
+  .live-dot{width:8px;height:8px;border-radius:50%;background:var(--accent3);animation:pulse 1.5s infinite;display:inline-block;margin-right:4px;}
+  @keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.5;transform:scale(1.3)}}
+  .viewers-count{font-size:0.8rem;color:var(--text-muted);display:flex;align-items:center;gap:6px;}
+  .header-actions{margin-left:auto;display:flex;gap:8px;}
 
-  .prof-body { display:grid; grid-template-columns:1fr 280px; height:calc(100vh - 58px); }
-  .main-area { padding:1rem; display:flex; flex-direction:column; gap:0.8rem; overflow:hidden; }
+  .prof-body{display:grid;grid-template-columns:1fr 280px;height:calc(100vh - 58px);}
+  .main-area{padding:1rem;display:flex;flex-direction:column;gap:0.8rem;overflow:hidden;}
 
-  /* TOOLBAR PROFESSOR */
-  .prof-toolbar { display:flex; gap:6px; align-items:center; flex-wrap:wrap; }
-  .tb-btn { display:flex; align-items:center; gap:5px; background:var(--surface2); border:1px solid var(--border); border-radius:9px; padding:0.55rem 0.9rem; cursor:pointer; font-size:0.8rem; color:var(--text-muted); font-family:var(--font-body); font-weight:500; transition:all 0.15s; white-space:nowrap; }
-  .tb-btn:hover { border-color:var(--text-muted); color:var(--text); }
-  .tb-btn.active { background:rgba(0,212,170,0.1); border-color:rgba(0,212,170,0.4); color:var(--accent); }
-  .tb-btn.screen-active { background:rgba(255,107,107,0.12); border-color:rgba(255,107,107,0.4); color:var(--accent3); }
-  .tb-sep { width:1px; height:24px; background:var(--border); flex-shrink:0; }
+  /* TOOLBAR */
+  .prof-toolbar{display:flex;gap:6px;align-items:center;flex-wrap:wrap;}
+  .tb-btn{display:flex;align-items:center;gap:5px;background:var(--surface2);border:1px solid var(--border);border-radius:9px;padding:0.55rem 0.9rem;cursor:pointer;font-size:0.8rem;color:var(--text-muted);font-family:var(--font-body);font-weight:500;transition:all 0.15s;white-space:nowrap;}
+  .tb-btn:hover{border-color:var(--text-muted);color:var(--text);}
+  .tb-btn.active{background:rgba(0,212,170,0.1);border-color:rgba(0,212,170,0.4);color:var(--accent);}
+  .tb-btn.screen-active{background:rgba(255,107,107,0.12);border-color:rgba(255,107,107,0.4);color:var(--accent3);}
+  .tb-sep{width:1px;height:24px;background:var(--border);}
 
-  /* DRAWING TOOLS PROFESSOR */
-  .draw-toolbar { display:flex; gap:6px; align-items:center; flex-wrap:wrap; padding:0.5rem 0.7rem; background:var(--surface); border:1px solid var(--border); border-radius:10px; }
-  .draw-toolbar.hidden { display:none; }
-  .dtool-btn { background:var(--surface2); border:1px solid var(--border); border-radius:7px; padding:0.4rem 0.7rem; color:var(--text-muted); cursor:pointer; font-size:0.78rem; font-family:var(--font-body); transition:all 0.15s; white-space:nowrap; }
-  .dtool-btn:hover, .dtool-btn.active { background:rgba(245,166,35,0.12); border-color:rgba(245,166,35,0.4); color:var(--accent4); }
-  .color-dot { width:22px; height:22px; border-radius:50%; cursor:pointer; border:2px solid transparent; transition:border-color 0.15s; flex-shrink:0; }
-  .color-dot.active { border-color:#fff; }
-  .size-range { width:70px; accent-color:var(--accent4); }
-  .draw-sep { width:1px; height:20px; background:var(--border); }
+  /* DRAW TOOLBAR */
+  .draw-toolbar{display:flex;gap:6px;align-items:center;flex-wrap:wrap;padding:0.5rem 0.7rem;background:var(--surface);border:1px solid var(--border);border-radius:10px;}
+  .draw-toolbar.hidden{display:none;}
+  .dtool-btn{background:var(--surface2);border:1px solid var(--border);border-radius:7px;padding:0.4rem 0.7rem;color:var(--text-muted);cursor:pointer;font-size:0.78rem;font-family:var(--font-body);transition:all 0.15s;white-space:nowrap;}
+  .dtool-btn:hover,.dtool-btn.active{background:rgba(245,166,35,0.12);border-color:rgba(245,166,35,0.4);color:var(--accent4);}
+  .color-dot{width:22px;height:22px;border-radius:50%;cursor:pointer;border:2px solid transparent;transition:border-color 0.15s;flex-shrink:0;}
+  .color-dot.active{border-color:#fff;}
+  .size-range{width:70px;accent-color:var(--accent4);}
+  .draw-sep{width:1px;height:20px;background:var(--border);}
 
-  /* PREVIEW BOX */
-  .preview-box { background:var(--surface); border:1px solid var(--border); border-radius:14px; overflow:hidden; flex:1; display:flex; align-items:center; justify-content:center; position:relative; min-height:200px; }
-  .preview-placeholder { text-align:center; color:var(--text-muted); }
-  .preview-placeholder .big-icon { font-size:3rem; margin-bottom:1rem; }
-  .preview-placeholder p { font-size:0.85rem; }
-  #preview-video { width:100%; height:100%; object-fit:contain; display:none; }
-  #preview-image { max-width:100%; max-height:100%; object-fit:contain; display:none; border-radius:8px; }
-  /* Professor draw canvas */
-  #prof-draw-canvas { position:absolute; top:0; left:0; width:100%; height:100%; z-index:5; display:none; }
-  #prof-draw-canvas.active { display:block; cursor:crosshair; }
+  /* PREVIEW */
+  .preview-box{background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden;flex:1;display:flex;align-items:center;justify-content:center;position:relative;min-height:200px;}
+  .preview-placeholder{text-align:center;color:var(--text-muted);}
+  .preview-placeholder .big-icon{font-size:3rem;margin-bottom:1rem;}
+  .preview-placeholder p{font-size:0.85rem;line-height:1.6;}
+  #preview-video{width:100%;height:100%;object-fit:contain;display:none;}
+  #preview-image{max-width:100%;max-height:100%;object-fit:contain;display:none;border-radius:8px;}
+  #prof-draw-canvas{position:absolute;top:0;left:0;width:100%;height:100%;z-index:5;display:none;}
+  #prof-draw-canvas.active{display:block;cursor:crosshair;}
+
+  /* SCREEN SHARE BAR */
+  .screen-share-bar{background:rgba(255,107,107,0.1);border:1px solid rgba(255,107,107,0.3);border-radius:10px;padding:0.5rem 1rem;display:none;align-items:center;gap:8px;font-size:0.8rem;color:var(--accent3);}
+  .screen-share-bar.visible{display:flex;}
 
   /* SIDEBAR */
-  .sidebar { background:var(--surface); border-left:1px solid var(--border); padding:1rem; display:flex; flex-direction:column; gap:1rem; overflow-y:auto; }
-  .sidebar-title { font-family:var(--font-mono); font-size:0.65rem; letter-spacing:0.14em; text-transform:uppercase; color:var(--text-dim); margin-bottom:0.7rem; }
-  #qr-container { background:#fff; border-radius:10px; padding:10px; display:flex; align-items:center; justify-content:center; width:100%; aspect-ratio:1; max-width:220px; margin:0 auto; }
-  #qr-container canvas, #qr-container img { width:100% !important; height:100% !important; }
-  .session-link { display:flex; align-items:center; gap:6px; background:var(--surface2); border:1px solid var(--border); border-radius:8px; padding:0.5rem 0.7rem; margin-top:0.6rem; }
-  .session-link code { font-family:var(--font-mono); font-size:0.72rem; color:var(--accent); flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-  .copy-btn { background:none; border:none; color:var(--text-muted); cursor:pointer; font-size:0.75rem; font-family:var(--font-body); padding:0.1rem 0.3rem; transition:color 0.15s; white-space:nowrap; }
-  .copy-btn:hover { color:var(--accent); }
-  .viewer-item { display:flex; align-items:center; gap:8px; padding:0.4rem 0; border-bottom:1px solid var(--border); font-size:0.82rem; }
-  .viewer-dot { width:8px; height:8px; border-radius:50%; background:var(--accent); flex-shrink:0; }
+  .sidebar{background:var(--surface);border-left:1px solid var(--border);padding:1rem;display:flex;flex-direction:column;gap:1rem;overflow-y:auto;}
+  .sidebar-title{font-family:var(--font-mono);font-size:0.65rem;letter-spacing:0.14em;text-transform:uppercase;color:var(--text-dim);margin-bottom:0.7rem;}
+  #qr-container{background:#fff;border-radius:10px;padding:10px;display:flex;align-items:center;justify-content:center;width:100%;aspect-ratio:1;max-width:220px;margin:0 auto;}
+  #qr-container canvas,#qr-container img{width:100%!important;height:100%!important;}
+  .session-link{display:flex;align-items:center;gap:6px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:0.5rem 0.7rem;margin-top:0.6rem;}
+  .session-link code{font-family:var(--font-mono);font-size:0.72rem;color:var(--accent);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .copy-btn{background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:0.75rem;font-family:var(--font-body);padding:0.1rem 0.3rem;transition:color 0.15s;white-space:nowrap;}
+  .copy-btn:hover{color:var(--accent);}
+  .viewer-item{display:flex;align-items:center;gap:8px;padding:0.4rem 0;border-bottom:1px solid var(--border);font-size:0.82rem;}
+  .viewer-dot{width:8px;height:8px;border-radius:50%;background:var(--accent);flex-shrink:0;}
 
   /* ALUNO */
-  #screen-aluno { padding:0; background:#080b10; }
-  .aluno-header { background:var(--surface); border-bottom:1px solid var(--border); padding:0.6rem 1rem; display:flex; align-items:center; gap:0.8rem; }
-  .aluno-logo { font-family:var(--font-display); font-weight:800; font-size:1rem; color:var(--accent2); }
-  .aluno-session { font-family:var(--font-mono); font-size:0.7rem; color:var(--text-muted); letter-spacing:0.1em; }
-  .aluno-actions { margin-left:auto; display:flex; gap:6px; }
-  .aluno-body { display:flex; flex-direction:column; height:calc(100vh - 50px); }
-  .image-viewer { flex:1; position:relative; overflow:hidden; background:#050709; display:flex; align-items:center; justify-content:center; }
-  #aluno-image { max-width:100%; max-height:100%; object-fit:contain; position:relative; z-index:1; user-select:none; display:none; }
-  #aluno-video { width:100%; height:100%; object-fit:contain; position:relative; z-index:1; display:none; }
-  #annotation-canvas { position:absolute; top:0; left:0; width:100%; height:100%; z-index:2; cursor:crosshair; }
+  #screen-aluno{padding:0;background:#080b10;}
+  .aluno-header{background:var(--surface);border-bottom:1px solid var(--border);padding:0.6rem 1rem;display:flex;align-items:center;gap:0.8rem;}
+  .aluno-logo{font-family:var(--font-display);font-weight:800;font-size:1rem;color:var(--accent2);}
+  .aluno-session{font-family:var(--font-mono);font-size:0.7rem;color:var(--text-muted);letter-spacing:0.1em;}
+  .aluno-actions{margin-left:auto;display:flex;gap:6px;}
+  .aluno-body{display:flex;flex-direction:column;height:calc(100vh - 50px);}
+  .image-viewer{flex:1;position:relative;overflow:hidden;background:#050709;display:flex;align-items:center;justify-content:center;}
+  #aluno-image{max-width:100%;max-height:100%;object-fit:contain;position:relative;z-index:1;user-select:none;display:none;}
+  #annotation-canvas{position:absolute;top:0;left:0;width:100%;height:100%;z-index:2;cursor:crosshair;}
+  .waiting-msg{text-align:center;color:var(--text-muted);display:flex;flex-direction:column;align-items:center;gap:1rem;padding:2rem;}
+  .waiting-msg .icon{font-size:3rem;}
+  .waiting-msg p{font-size:0.9rem;line-height:1.6;}
+  .conn-status{font-size:0.75rem;padding:0.25rem 0.7rem;border-radius:20px;display:inline-block;margin-top:0.5rem;}
+  .conn-status.connecting{background:rgba(245,166,35,0.15);color:var(--accent4);}
+  .conn-status.connected{background:rgba(0,212,170,0.15);color:var(--accent);}
+  .conn-status.error{background:rgba(255,107,107,0.15);color:var(--accent3);}
 
-  .waiting-msg { text-align:center; color:var(--text-muted); display:flex; flex-direction:column; align-items:center; gap:1rem; }
-  .waiting-msg .icon { font-size:3rem; }
-  .waiting-msg p { font-size:0.9rem; }
-
-  /* ANNOTATION BAR ALUNO */
-  .annotation-bar { background:var(--surface); border-top:1px solid var(--border); padding:0.6rem 0.8rem; display:flex; align-items:center; gap:6px; overflow-x:auto; }
-  .tool-btn { background:var(--surface2); border:1px solid var(--border); border-radius:8px; padding:0.4rem 0.65rem; color:var(--text-muted); cursor:pointer; font-size:0.78rem; font-family:var(--font-body); transition:all 0.15s; white-space:nowrap; display:flex; align-items:center; gap:4px; }
-  .tool-btn:hover, .tool-btn.active { background:rgba(79,142,247,0.12); border-color:var(--accent2); color:var(--accent2); }
-  .tool-btn.save-btn { background:rgba(0,212,170,0.1); border-color:rgba(0,212,170,0.3); color:var(--accent); margin-left:auto; }
-  .tool-btn.save-btn:hover { background:rgba(0,212,170,0.2); }
-  .divider { width:1px; height:22px; background:var(--border); flex-shrink:0; }
+  /* ANNOTATION BAR */
+  .annotation-bar{background:var(--surface);border-top:1px solid var(--border);padding:0.6rem 0.8rem;display:flex;align-items:center;gap:6px;overflow-x:auto;}
+  .tool-btn{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:0.4rem 0.65rem;color:var(--text-muted);cursor:pointer;font-size:0.78rem;font-family:var(--font-body);transition:all 0.15s;white-space:nowrap;}
+  .tool-btn:hover,.tool-btn.active{background:rgba(79,142,247,0.12);border-color:var(--accent2);color:var(--accent2);}
+  .tool-btn.save-btn{background:rgba(0,212,170,0.1);border-color:rgba(0,212,170,0.3);color:var(--accent);margin-left:auto;}
+  .tool-btn.save-btn:hover{background:rgba(0,212,170,0.2);}
+  .divider{width:1px;height:22px;background:var(--border);flex-shrink:0;}
 
   /* MODAL */
-  .modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.7); z-index:100; align-items:center; justify-content:center; padding:1rem; }
-  .modal-overlay.open { display:flex; }
-  .modal { background:var(--surface); border:1px solid var(--border); border-radius:18px; padding:1.8rem; max-width:360px; width:100%; }
-  .modal h3 { font-family:var(--font-display); font-weight:700; font-size:1.1rem; margin-bottom:1rem; }
-  .modal input { width:100%; background:var(--bg); border:1px solid var(--border); border-radius:10px; padding:0.7rem 1rem; color:var(--text); font-family:var(--font-mono); font-size:0.95rem; outline:none; margin-bottom:0.8rem; transition:border-color 0.2s; }
-  .modal input:focus { border-color:var(--accent2); }
-  .modal .modal-actions { display:flex; gap:8px; justify-content:flex-end; margin-top:0.5rem; }
+  .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:100;align-items:center;justify-content:center;padding:1rem;}
+  .modal-overlay.open{display:flex;}
+  .modal{background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:1.8rem;max-width:360px;width:100%;}
+  .modal h3{font-family:var(--font-display);font-weight:700;font-size:1.1rem;margin-bottom:1rem;}
+  .modal input{width:100%;background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:0.7rem 1rem;color:var(--text);font-family:var(--font-mono);font-size:0.95rem;outline:none;margin-bottom:0.8rem;transition:border-color 0.2s;}
+  .modal input:focus{border-color:var(--accent2);}
+  .modal .modal-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:0.5rem;}
 
   /* TOAST */
-  .toast { position:fixed; bottom:1.5rem; left:50%; transform:translateX(-50%) translateY(100px); background:var(--surface2); border:1px solid var(--border); border-radius:10px; padding:0.7rem 1.4rem; font-size:0.85rem; color:var(--text); z-index:9999; transition:transform 0.3s ease; white-space:nowrap; pointer-events:none; }
-  .toast.show { transform:translateX(-50%) translateY(0); }
-  .toast.success { border-color:var(--accent); color:var(--accent); }
+  .toast{position:fixed;bottom:1.5rem;left:50%;transform:translateX(-50%) translateY(100px);background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:0.7rem 1.4rem;font-size:0.85rem;color:var(--text);z-index:9999;transition:transform 0.3s;white-space:nowrap;pointer-events:none;}
+  .toast.show{transform:translateX(-50%) translateY(0);}
+  .toast.success{border-color:var(--accent);color:var(--accent);}
 
-  /* SCREEN SHARE indicator */
-  .screen-share-bar { background:rgba(255,107,107,0.1); border:1px solid rgba(255,107,107,0.3); border-radius:10px; padding:0.5rem 1rem; display:none; align-items:center; gap:8px; font-size:0.8rem; color:var(--accent3); }
-  .screen-share-bar.visible { display:flex; }
-
-  @media (max-width:700px) {
-    .prof-body { grid-template-columns:1fr; }
-    .sidebar { border-left:none; border-top:1px solid var(--border); max-height:260px; }
-    #qr-container { max-width:130px; }
+  @media(max-width:700px){
+    .prof-body{grid-template-columns:1fr;}
+    .sidebar{border-left:none;border-top:1px solid var(--border);max-height:260px;}
+    #qr-container{max-width:130px;}
   }
 </style>
 </head>
@@ -168,8 +160,8 @@
 <div class="modal-overlay" id="modal-join">
   <div class="modal">
     <h3>🎓 Entrar como aluno</h3>
-    <input type="text" id="input-nome" placeholder="Seu nome" maxlength="30" />
-    <input type="text" id="input-codigo" placeholder="CÓDIGO DA SESSÃO (ex: RAD-4821)" maxlength="12" />
+    <input type="text" id="input-nome" placeholder="Seu nome" maxlength="30"/>
+    <input type="text" id="input-codigo" placeholder="CÓDIGO DA SESSÃO (ex: RAD-4821)" maxlength="12"/>
     <div class="modal-actions">
       <button class="btn secondary" onclick="closeModal()">Cancelar</button>
       <button class="btn blue" onclick="entrarSessao()">Entrar →</button>
@@ -194,11 +186,11 @@
         <div class="role-sub">Entrar com código</div>
       </div>
     </div>
-    <p style="font-size:0.75rem;color:var(--text-dim);margin-top:1rem;">Sem login · Sem instalação · Funciona em qualquer dispositivo</p>
+    <p style="font-size:0.75rem;color:var(--text-dim);">Sem login · Sem instalação · Funciona em qualquer dispositivo</p>
 
-    <div id="iframe-warning" style="display:none;margin-top:1.5rem;background:rgba(245,166,35,0.1);border:1px solid rgba(245,166,35,0.35);border-radius:12px;padding:1rem 1.2rem;text-align:left;">
-      <p style="font-size:0.82rem;color:var(--accent4);font-weight:600;margin-bottom:0.4rem;">⚠️ Para compartilhar tela, abra em nova aba</p>
-      <p style="font-size:0.76rem;color:var(--text-muted);margin-bottom:0.8rem;">O navegador bloqueia compartilhamento de tela dentro do Claude. Abra o app em uma aba separada para usar essa função.</p>
+    <div id="iframe-warning" style="display:none;" class="warn-box">
+      <p><strong>⚠️ Para compartilhar tela, abra em nova aba</strong><br>
+      O navegador bloqueia compartilhamento dentro do Claude. Abra o app separado para usar essa função.</p>
       <button onclick="abrirNovaAba()" style="background:var(--accent4);color:#000;border:none;border-radius:8px;padding:0.55rem 1.1rem;font-family:var(--font-display);font-weight:700;font-size:0.82rem;cursor:pointer;width:100%;">🚀 Abrir Radium Tela em nova aba</button>
     </div>
 
@@ -216,36 +208,26 @@
       <button class="btn secondary" onclick="voltarHome()" style="font-size:0.78rem;padding:0.45rem 0.9rem;">Encerrar</button>
     </div>
   </div>
-
   <div class="prof-body">
     <div class="main-area">
-
-      <!-- Toolbar principal -->
       <div class="prof-toolbar">
         <label class="tb-btn" style="cursor:pointer;">
           📂 Carregar imagem
           <input type="file" id="file-input" accept="image/*" style="display:none" onchange="carregarImagem(event)">
         </label>
-        <button class="tb-btn" id="btn-screenshare" onclick="toggleScreenShare()">
-          📡 Espelhar tela
-        </button>
+        <button class="tb-btn" id="btn-screenshare" onclick="toggleScreenShare()">📡 Espelhar tela</button>
         <div class="tb-sep"></div>
-        <button class="tb-btn" id="btn-draw-toggle" onclick="toggleDrawMode()">
-          ✏️ Desenhar na tela
-        </button>
-        <button class="tb-btn" onclick="limparTudo()">🗑 Limpar tudo</button>
+        <button class="tb-btn" id="btn-draw-toggle" onclick="toggleDrawMode()">✏️ Desenhar</button>
+        <button class="tb-btn" onclick="limparTudo()">🗑 Limpar</button>
       </div>
 
-      <!-- Screen share indicator -->
       <div class="screen-share-bar" id="screen-share-bar">
-        <span class="live-dot"></span>
-        Espelhando tela ao vivo para os alunos
+        <span class="live-dot"></span> Espelhando tela ao vivo
         <button onclick="pararScreenShare()" style="margin-left:auto;background:none;border:1px solid rgba(255,107,107,0.4);border-radius:6px;padding:0.2rem 0.6rem;color:var(--accent3);cursor:pointer;font-size:0.75rem;">Parar</button>
       </div>
 
-      <!-- Draw toolbar -->
       <div class="draw-toolbar hidden" id="draw-toolbar">
-        <span style="font-size:0.75rem;color:var(--text-dim);margin-right:4px;white-space:nowrap;">Ferramenta:</span>
+        <span style="font-size:0.75rem;color:var(--text-dim);white-space:nowrap;">Ferramenta:</span>
         <button class="dtool-btn active" id="ptool-pen" onclick="setProfTool('pen')">✏️ Caneta</button>
         <button class="dtool-btn" id="ptool-arrow" onclick="setProfTool('arrow')">↗ Seta</button>
         <button class="dtool-btn" id="ptool-circle" onclick="setProfTool('circle')">⭕ Círculo</button>
@@ -257,30 +239,28 @@
         <div class="color-dot" style="background:#44ff88;" data-color="#44ff88" onclick="setProfColor(this)"></div>
         <div class="color-dot" style="background:#4488ff;" data-color="#4488ff" onclick="setProfColor(this)"></div>
         <div class="color-dot" style="background:#ffffff;" data-color="#ffffff" onclick="setProfColor(this)"></div>
-        <input type="range" class="size-range" id="prof-size-range" min="1" max="16" value="4" title="Espessura">
+        <input type="range" class="size-range" id="prof-size-range" min="1" max="16" value="4">
         <div class="draw-sep"></div>
         <button class="dtool-btn" onclick="desfazerProfDraw()">↩ Desfazer</button>
-        <button class="dtool-btn" onclick="limparDesenhoProf()">🗑 Limpar desenho</button>
-        <button class="dtool-btn" style="margin-left:auto;background:rgba(0,212,170,0.1);border-color:rgba(0,212,170,0.3);color:var(--accent);" onclick="enviarDesenho()">📤 Enviar para alunos</button>
+        <button class="dtool-btn" onclick="limparDesenhoProf()">🗑 Limpar</button>
+        <button class="dtool-btn" onclick="enviarDesenho()" style="background:rgba(0,212,170,0.1);border-color:rgba(0,212,170,0.3);color:var(--accent);">📤 Enviar</button>
       </div>
 
-      <!-- Preview -->
       <div class="preview-box" id="preview-box">
         <div class="preview-placeholder" id="placeholder-msg">
           <div class="big-icon">🫁</div>
-          <p>Carregue uma imagem, espelhe sua tela<br>ou ative o modo de desenho</p>
+          <p>Carregue uma imagem ou espelhe sua tela<br>Os alunos verão em tempo real</p>
         </div>
         <video id="preview-video" autoplay muted playsinline></video>
-        <img id="preview-image" alt="Imagem atual" />
+        <img id="preview-image" alt="Imagem atual"/>
         <canvas id="prof-draw-canvas"></canvas>
       </div>
     </div>
 
-    <!-- Sidebar -->
     <div class="sidebar">
       <div>
         <div class="sidebar-title">QR Code da sessão</div>
-        <div id="qr-container"><span style="color:#999;font-size:0.8rem">Carregando...</span></div>
+        <div id="qr-container"><span style="color:#999;font-size:0.8rem">Gerando...</span></div>
         <div class="session-link">
           <code id="link-text">—</code>
           <button class="copy-btn" onclick="copiarLink()">Copiar</button>
@@ -289,7 +269,7 @@
       </div>
       <div>
         <div class="sidebar-title">Alunos conectados</div>
-        <div id="viewers-list"><p style="font-size:0.8rem;color:var(--text-dim);">Aguardando conexões...</p></div>
+        <div id="viewers-list"><p style="font-size:0.8rem;color:var(--text-dim);">Aguardando...</p></div>
       </div>
     </div>
   </div>
@@ -309,11 +289,11 @@
     <div class="image-viewer" id="image-viewer">
       <div class="waiting-msg" id="waiting-msg">
         <div class="icon">⏳</div>
-        <p>Aguardando o professor compartilhar...</p>
+        <p id="waiting-text">Conectando ao servidor...</p>
+        <span class="conn-status connecting" id="conn-status">🔄 Conectando...</span>
         <p style="font-size:0.75rem;color:var(--text-dim);" id="aluno-nome-label"></p>
       </div>
-      <img id="aluno-image" alt="Imagem do professor" />
-      <video id="aluno-video" autoplay playsinline muted></video>
+      <img id="aluno-image" alt="Imagem do professor"/>
       <canvas id="annotation-canvas"></canvas>
     </div>
     <div class="annotation-bar">
@@ -337,56 +317,32 @@
 </div>
 
 <script>
-// ===================== ESTADO =====================
-const state = {
-  role: null,
-  sessionCode: null,
-  nomeAluno: null,
-  _intervals: [],
-  // Professor draw
-  profDrawMode: false,
-  profTool: 'pen',
-  profColor: '#ff4444',
-  profDrawings: [],
-  profCurrentDraw: null,
-  profIsDrawing: false,
-  profStartX: 0, profStartY: 0,
-  // Screen share
-  screenStream: null,
-  screenInterval: null,
-  // Aluno annotation
-  tool: 'arrow',
-  color: '#ff4444',
-  annotations: [],
-  currentAnnotation: null,
-  isDrawing: false,
-  startX: 0, startY: 0,
-};
+// =====================================================================
+// RADIUM TELA — comunicação via PieSocket (WebSocket público gratuito)
+// Canal: radiumtela_{código} — professor publica, alunos recebem
+// =====================================================================
 
-// ===================== STORAGE / BROADCAST =====================
-const PRE = 'radtela_';
-function sk(code, type) { return PRE + code + '_' + type; }
-function broadcast(code, type, data) {
-  try { localStorage.setItem(sk(code, type), JSON.stringify({ data, ts: Date.now() })); } catch(e) {}
-}
-function subscribe(code, type, cb) {
-  const key = sk(code, type);
-  let lastTs = 0;
-  return setInterval(() => {
-    try {
-      const raw = localStorage.getItem(key);
-      if (!raw) return;
-      const obj = JSON.parse(raw);
-      if (obj.ts > lastTs) { lastTs = obj.ts; cb(obj.data); }
-    } catch(e) {}
-  }, 600);
-}
+const PIESOCKET_KEY = 'oCNT07COj00ZXbMHEF5jfQl8S3W82Cjod09nC8O5'; // free tier key
+const PIESOCKET_CLUSTER = 'demo.piesocket.com';
+
+const state = {
+  role: null, sessionCode: null, nomeAluno: null,
+  ws: null, wsReady: false, wsQueue: [],
+  viewers: {},
+  profDrawMode: false, profTool: 'pen', profColor: '#ff4444',
+  profDrawings: [], profCurrentDraw: null, profIsDrawing: false,
+  profStartX: 0, profStartY: 0,
+  screenStream: null, screenInterval: null,
+  tool: 'arrow', color: '#ff4444',
+  annotations: [], currentAnnotation: null,
+  isDrawing: false, startX: 0, startY: 0,
+  _intervals: [],
+};
 
 // ===================== UTILS =====================
 function showToast(msg, type='') {
   const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.className = 'toast show ' + type;
+  t.textContent = msg; t.className = 'toast show ' + type;
   setTimeout(() => t.className = 'toast', 2800);
 }
 function showScreen(id) {
@@ -395,81 +351,143 @@ function showScreen(id) {
 }
 function closeModal() { document.getElementById('modal-join').classList.remove('open'); }
 function gerarCodigo() {
-  const p = ['RAD','RX','TC','MR','US'][Math.floor(Math.random()*5)];
-  return p + '-' + (1000 + Math.floor(Math.random()*9000));
+  return ['RAD','RX','TC','MR','US'][Math.floor(Math.random()*5)] + '-' + (1000+Math.floor(Math.random()*9000));
 }
 function copiarLink() {
   const link = document.getElementById('link-text').textContent;
-  navigator.clipboard?.writeText(link).then(() => showToast('Link copiado!', 'success'));
+  navigator.clipboard?.writeText(link).then(() => showToast('Link copiado!','success'));
 }
 function voltarHome() {
+  fecharWS();
   if (state.screenStream) { state.screenStream.getTracks().forEach(t => t.stop()); state.screenStream = null; }
   if (state.screenInterval) { clearInterval(state.screenInterval); state.screenInterval = null; }
-  state._intervals.forEach(clearInterval);
-  state._intervals = [];
-  if (state.sessionCode) {
-    try { localStorage.removeItem(sk(state.sessionCode, 'image')); } catch(e) {}
-    try { localStorage.removeItem(sk(state.sessionCode, 'viewers')); } catch(e) {}
-    try { localStorage.removeItem(sk(state.sessionCode, 'drawing')); } catch(e) {}
-  }
+  state._intervals.forEach(clearInterval); state._intervals = [];
   state.role = null; state.sessionCode = null;
   showScreen('home');
 }
+function abrirNovaAba() {
+  const html = document.documentElement.outerHTML;
+  const blob = new Blob([html], {type:'text/html'});
+  window.open(URL.createObjectURL(blob), '_blank');
+}
 
-// ===================== PROFESSOR INIT =====================
+// ===================== WEBSOCKET via PieSocket =====================
+function abrirWS(canal, onMsg) {
+  const url = `wss://${PIESOCKET_CLUSTER}/v3/${canal}?api_key=${PIESOCKET_KEY}&notify_self=1`;
+  const ws = new WebSocket(url);
+  state.ws = ws;
+  state.wsReady = false;
+  state.wsQueue = [];
+
+  ws.onopen = () => {
+    state.wsReady = true;
+    state.wsQueue.forEach(m => ws.send(m));
+    state.wsQueue = [];
+    console.log('WS conectado:', canal);
+  };
+  ws.onmessage = (e) => {
+    try {
+      const msg = JSON.parse(e.data);
+      // ignora mensagens de sistema do PieSocket
+      if (msg.event && msg.event !== 'message') return;
+      const data = msg.data || msg;
+      onMsg(data);
+    } catch(err) {}
+  };
+  ws.onerror = (e) => { console.error('WS error', e); };
+  ws.onclose = () => { state.wsReady = false; };
+  return ws;
+}
+
+function enviarWS(data) {
+  const str = JSON.stringify({ event: 'message', data });
+  if (state.ws && state.wsReady) {
+    state.ws.send(str);
+  } else if (state.ws) {
+    state.wsQueue.push(str);
+  }
+}
+
+function fecharWS() {
+  if (state.ws) { try { state.ws.close(); } catch(e) {} state.ws = null; }
+}
+
+// ===================== PROFESSOR =====================
 function entrarComoProfessor() {
   state.role = 'professor';
   state.sessionCode = gerarCodigo();
-  state._intervals = [];
 
   document.getElementById('badge-codigo').textContent = state.sessionCode;
   document.getElementById('viewers-num').textContent = '0';
 
-  const fakeLink = window.location.href.split('?')[0] + '?sessao=' + state.sessionCode;
-  document.getElementById('link-text').textContent = fakeLink;
+  // Link para alunos: usa URL atual com parâmetro
+  const base = window.location.href.split('?')[0];
+  const joinUrl = base + '?sessao=' + state.sessionCode;
+  document.getElementById('link-text').textContent = joinUrl;
 
   const qrEl = document.getElementById('qr-container');
   qrEl.innerHTML = '';
-  try { new QRCode(qrEl, { text: fakeLink, width: 200, height: 200, colorDark: '#000', colorLight: '#fff' }); }
+  try { new QRCode(qrEl, {text: joinUrl, width:200, height:200, colorDark:'#000', colorLight:'#fff'}); }
   catch(e) { qrEl.innerHTML = '<span style="color:#999;font-size:0.75rem">QR indisponível</span>'; }
 
-  broadcast(state.sessionCode, 'viewers', {});
-
-  const iv = subscribe(state.sessionCode, 'viewers', (viewers) => {
-    const names = Object.keys(viewers || {});
-    document.getElementById('viewers-num').textContent = names.length;
-    const list = document.getElementById('viewers-list');
-    if (!names.length) { list.innerHTML = '<p style="font-size:0.8rem;color:var(--text-dim);">Aguardando...</p>'; return; }
-    list.innerHTML = names.map(n => `<div class="viewer-item"><div class="viewer-dot"></div><span style="font-size:0.82rem">${n}</span></div>`).join('');
+  // Abre WebSocket no canal da sessão
+  abrirWS('radiumtela_' + state.sessionCode, (data) => {
+    if (data.type === 'join') {
+      state.viewers[data.nome] = Date.now();
+      atualizarViewers();
+      showToast('🎓 ' + data.nome + ' entrou na sessão');
+      // Reenvia imagem atual para o novo aluno
+      setTimeout(() => reenviarEstadoAtual(), 500);
+    } else if (data.type === 'leave') {
+      delete state.viewers[data.nome];
+      atualizarViewers();
+    }
   });
-  state._intervals.push(iv);
 
   showScreen('professor');
+  setTimeout(() => { const box = document.getElementById('preview-box'); const c = document.getElementById('prof-draw-canvas'); c.width = box.offsetWidth; c.height = box.offsetHeight; }, 100);
+}
 
-  // Init professor draw canvas
-  setTimeout(() => {
-    const box = document.getElementById('preview-box');
-    const c = document.getElementById('prof-draw-canvas');
-    c.width = box.offsetWidth;
-    c.height = box.offsetHeight;
-  }, 100);
+function atualizarViewers() {
+  const names = Object.keys(state.viewers);
+  document.getElementById('viewers-num').textContent = names.length;
+  const list = document.getElementById('viewers-list');
+  if (!names.length) { list.innerHTML = '<p style="font-size:0.8rem;color:var(--text-dim);">Aguardando...</p>'; return; }
+  list.innerHTML = names.map(n => `<div class="viewer-item"><div class="viewer-dot"></div><span style="font-size:0.82rem">${n}</span></div>`).join('');
+}
+
+function reenviarEstadoAtual() {
+  const img = document.getElementById('preview-image');
+  if (img.src && img.style.display !== 'none') {
+    enviarWS({ type: 'image', src: img.src });
+  }
 }
 
 // ===================== CARREGAR IMAGEM =====================
 function carregarImagem(event) {
-  const file = event.target.files[0];
-  if (!file) return;
+  const file = event.target.files[0]; if (!file) return;
+  // Redimensiona para envio eficiente
   const reader = new FileReader();
   reader.onload = (e) => {
-    const dataUrl = e.target.result;
-    document.getElementById('preview-image').src = dataUrl;
-    document.getElementById('preview-image').style.display = 'block';
-    document.getElementById('preview-video').style.display = 'none';
-    document.getElementById('placeholder-msg').style.display = 'none';
-    if (state.sessionCode) {
-      broadcast(state.sessionCode, 'image', { type: 'image', src: dataUrl });
-      showToast('✅ Imagem enviada aos alunos!', 'success');
-    }
+    const img = new Image();
+    img.onload = () => {
+      const maxW = 1280, maxH = 960;
+      let w = img.width, h = img.height;
+      if (w > maxW) { h = h * maxW/w; w = maxW; }
+      if (h > maxH) { w = w * maxH/h; h = maxH; }
+      const c = document.createElement('canvas'); c.width = w; c.height = h;
+      c.getContext('2d').drawImage(img, 0, 0, w, h);
+      const dataUrl = c.toDataURL('image/jpeg', 0.85);
+
+      document.getElementById('preview-image').src = dataUrl;
+      document.getElementById('preview-image').style.display = 'block';
+      document.getElementById('preview-video').style.display = 'none';
+      document.getElementById('placeholder-msg').style.display = 'none';
+
+      enviarWS({ type: 'image', src: dataUrl });
+      showToast('✅ Imagem enviada para os alunos!', 'success');
+    };
+    img.src = e.target.result;
   };
   reader.readAsDataURL(file);
 }
@@ -477,9 +495,14 @@ function carregarImagem(event) {
 // ===================== ESPELHAR TELA =====================
 async function toggleScreenShare() {
   if (state.screenStream) { pararScreenShare(); return; }
+  // Checa se está em iframe
+  let inIframe = false;
+  try { inIframe = window.self !== window.top; } catch(e) { inIframe = true; }
+  if (inIframe) { showToast('⚠️ Abra em nova aba para compartilhar tela'); document.getElementById('iframe-warning').style.display='block'; return; }
+
   try {
     const stream = await navigator.mediaDevices.getDisplayMedia({
-      video: { frameRate: 5, width: { ideal: 1280 }, height: { ideal: 720 } },
+      video: { frameRate: 5, width: {ideal:1280}, height: {ideal:720} },
       audio: false
     });
     state.screenStream = stream;
@@ -493,36 +516,30 @@ async function toggleScreenShare() {
     document.getElementById('btn-screenshare').classList.add('screen-active');
     document.getElementById('btn-screenshare').textContent = '⏹ Parar espelhamento';
 
-    // Captura frames e transmite via localStorage
-    const captureCanvas = document.createElement('canvas');
-    const captureCtx = captureCanvas.getContext('2d');
+    const captureC = document.createElement('canvas');
+    const captureCtx = captureC.getContext('2d');
 
     const sendFrame = () => {
       if (!stream.active || !video.videoWidth) return;
-      captureCanvas.width = video.videoWidth;
-      captureCanvas.height = video.videoHeight;
+      captureC.width = video.videoWidth; captureC.height = video.videoHeight;
       captureCtx.drawImage(video, 0, 0);
-      // Aplica desenhos do professor sobre o frame
+      // Sobrepõe desenhos do professor
       if (state.profDrawings.length > 0) {
-        const tempC = document.createElement('canvas');
-        tempC.width = captureCanvas.width; tempC.height = captureCanvas.height;
-        const tempCtx = tempC.getContext('2d');
-        // escala desenhos para o frame
         const box = document.getElementById('preview-box');
-        const scaleX = captureCanvas.width / box.offsetWidth;
-        const scaleY = captureCanvas.height / box.offsetHeight;
-        tempCtx.scale(scaleX, scaleY);
-        state.profDrawings.forEach(d => drawShape(tempCtx, d));
-        captureCtx.drawImage(tempC, 0, 0);
+        const sx = captureC.width / box.offsetWidth;
+        const sy = captureC.height / box.offsetHeight;
+        const tmpC = document.createElement('canvas'); tmpC.width = captureC.width; tmpC.height = captureC.height;
+        const tmpCtx = tmpC.getContext('2d');
+        tmpCtx.scale(sx, sy);
+        state.profDrawings.forEach(d => drawShape(tmpCtx, d));
+        captureCtx.drawImage(tmpC, 0, 0);
       }
-      const dataUrl = captureCanvas.toDataURL('image/jpeg', 0.65);
-      broadcast(state.sessionCode, 'image', { type: 'screen', src: dataUrl });
+      const dataUrl = captureC.toDataURL('image/jpeg', 0.6);
+      enviarWS({ type: 'screen', src: dataUrl });
     };
 
     state.screenInterval = setInterval(sendFrame, 400);
-
     stream.getVideoTracks()[0].onended = () => pararScreenShare();
-
     showToast('📡 Espelhando tela para os alunos!', 'success');
   } catch(e) {
     if (e.name !== 'NotAllowedError') showToast('Erro: ' + e.message);
@@ -536,9 +553,9 @@ function pararScreenShare() {
   document.getElementById('screen-share-bar').classList.remove('visible');
   document.getElementById('btn-screenshare').classList.remove('screen-active');
   document.getElementById('btn-screenshare').textContent = '📡 Espelhar tela';
-  if (!document.getElementById('preview-image').src || document.getElementById('preview-image').style.display === 'none') {
-    document.getElementById('placeholder-msg').style.display = 'block';
-  }
+  const img = document.getElementById('preview-image');
+  if (!img.src || img.style.display === 'none') document.getElementById('placeholder-msg').style.display = 'block';
+  enviarWS({ type: 'clear' });
   showToast('Espelhamento encerrado');
 }
 
@@ -548,38 +565,28 @@ function toggleDrawMode() {
   const canvas = document.getElementById('prof-draw-canvas');
   const toolbar = document.getElementById('draw-toolbar');
   const btn = document.getElementById('btn-draw-toggle');
-
   if (state.profDrawMode) {
-    canvas.classList.add('active');
-    toolbar.classList.remove('hidden');
-    btn.classList.add('active');
-    btn.textContent = '✏️ Modo desenho ON';
-    // Resize canvas to match box
+    canvas.classList.add('active'); toolbar.classList.remove('hidden');
+    btn.classList.add('active'); btn.textContent = '✏️ Desenho ON';
     const box = document.getElementById('preview-box');
-    canvas.width = box.offsetWidth;
-    canvas.height = box.offsetHeight;
+    canvas.width = box.offsetWidth; canvas.height = box.offsetHeight;
     document.getElementById('placeholder-msg').style.display = 'none';
   } else {
-    canvas.classList.remove('active');
-    toolbar.classList.add('hidden');
-    btn.classList.remove('active');
-    btn.textContent = '✏️ Desenhar na tela';
+    canvas.classList.remove('active'); toolbar.classList.add('hidden');
+    btn.classList.remove('active'); btn.textContent = '✏️ Desenhar';
   }
 }
-
 function setProfTool(tool) {
   state.profTool = tool;
   document.querySelectorAll('.dtool-btn[id^=ptool-]').forEach(b => b.classList.remove('active'));
-  document.getElementById('ptool-' + tool).classList.add('active');
+  document.getElementById('ptool-'+tool).classList.add('active');
 }
-
 function setProfColor(el) {
   state.profColor = el.dataset.color;
   el.closest('.draw-toolbar').querySelectorAll('.color-dot').forEach(d => d.classList.remove('active'));
   el.classList.add('active');
 }
 
-// Canvas events professor
 const profCanvas = document.getElementById('prof-draw-canvas');
 const profCtx = profCanvas.getContext('2d');
 
@@ -593,140 +600,99 @@ profCanvas.addEventListener('mousedown', profStartDraw);
 profCanvas.addEventListener('mousemove', profMoveDraw);
 profCanvas.addEventListener('mouseup', profEndDraw);
 profCanvas.addEventListener('mouseleave', profEndDraw);
-profCanvas.addEventListener('touchstart', e => { e.preventDefault(); profStartDraw(e); }, { passive: false });
-profCanvas.addEventListener('touchmove', e => { e.preventDefault(); profMoveDraw(e); }, { passive: false });
+profCanvas.addEventListener('touchstart', e => { e.preventDefault(); profStartDraw(e); }, {passive:false});
+profCanvas.addEventListener('touchmove', e => { e.preventDefault(); profMoveDraw(e); }, {passive:false});
 profCanvas.addEventListener('touchend', profEndDraw);
 
 function profStartDraw(e) {
   if (!state.profDrawMode) return;
   const pos = getProfPos(e);
-  state.profIsDrawing = true;
-  state.profStartX = pos.x; state.profStartY = pos.y;
+  state.profIsDrawing = true; state.profStartX = pos.x; state.profStartY = pos.y;
   const size = +document.getElementById('prof-size-range').value;
   if (state.profTool === 'pen') {
-    state.profCurrentDraw = { type: 'pen', color: state.profColor, size, points: [pos] };
+    state.profCurrentDraw = { type:'pen', color:state.profColor, size, points:[pos] };
   } else if (state.profTool === 'text') {
     const text = prompt('Texto:');
-    if (text) {
-      state.profDrawings.push({ type: 'text', color: state.profColor, size, x: pos.x, y: pos.y, text });
-      redrawProfCanvas();
-      if (state.screenStream) {} // next frame will include it
-      else broadcastProfDrawing();
-    }
+    if (text) { state.profDrawings.push({type:'text',color:state.profColor,size,x:pos.x,y:pos.y,text}); redrawProfCanvas(); if (!state.screenStream) broadcastProfDrawing(); }
     state.profIsDrawing = false;
   }
 }
-
 function profMoveDraw(e) {
   if (!state.profIsDrawing || !state.profDrawMode) return;
   const pos = getProfPos(e);
   const size = +document.getElementById('prof-size-range').value;
   if (state.profTool === 'pen' && state.profCurrentDraw) {
-    state.profCurrentDraw.points.push(pos);
-    redrawProfCanvas();
-    drawShape(profCtx, state.profCurrentDraw);
+    state.profCurrentDraw.points.push(pos); redrawProfCanvas(); drawShape(profCtx, state.profCurrentDraw);
   } else if (['arrow','circle','rect'].includes(state.profTool)) {
-    redrawProfCanvas();
-    drawShape(profCtx, { type: state.profTool, color: state.profColor, size, x1: state.profStartX, y1: state.profStartY, x2: pos.x, y2: pos.y });
+    redrawProfCanvas(); drawShape(profCtx, {type:state.profTool,color:state.profColor,size,x1:state.profStartX,y1:state.profStartY,x2:pos.x,y2:pos.y});
   }
 }
-
 function profEndDraw(e) {
   if (!state.profIsDrawing || !state.profDrawMode) return;
   const pos = getProfPos(e);
   state.profIsDrawing = false;
   const size = +document.getElementById('prof-size-range').value;
-  if (state.profTool === 'pen' && state.profCurrentDraw) {
-    state.profDrawings.push(state.profCurrentDraw);
-    state.profCurrentDraw = null;
-  } else if (['arrow','circle','rect'].includes(state.profTool)) {
-    state.profDrawings.push({ type: state.profTool, color: state.profColor, size, x1: state.profStartX, y1: state.profStartY, x2: pos.x, y2: pos.y });
+  if (state.profTool === 'pen' && state.profCurrentDraw) { state.profDrawings.push(state.profCurrentDraw); state.profCurrentDraw = null; }
+  else if (['arrow','circle','rect'].includes(state.profTool)) {
+    state.profDrawings.push({type:state.profTool,color:state.profColor,size,x1:state.profStartX,y1:state.profStartY,x2:pos.x,y2:pos.y});
   }
   redrawProfCanvas();
   if (!state.screenStream) broadcastProfDrawing();
 }
-
-function redrawProfCanvas() {
-  profCtx.clearRect(0, 0, profCanvas.width, profCanvas.height);
-  state.profDrawings.forEach(d => drawShape(profCtx, d));
-}
-
+function redrawProfCanvas() { profCtx.clearRect(0,0,profCanvas.width,profCanvas.height); state.profDrawings.forEach(d => drawShape(profCtx,d)); }
 function desfazerProfDraw() { state.profDrawings.pop(); redrawProfCanvas(); if (!state.screenStream) broadcastProfDrawing(); }
-function limparDesenhoProf() { state.profDrawings = []; redrawProfCanvas(); if (!state.screenStream) broadcastProfDrawing(); }
+function limparDesenhoProf() { state.profDrawings=[]; redrawProfCanvas(); if (!state.screenStream) broadcastProfDrawing(); }
 
 function broadcastProfDrawing() {
-  // Exporta canvas do professor como imagem + desenhos
-  const offscreen = document.createElement('canvas');
-  offscreen.width = profCanvas.width; offscreen.height = profCanvas.height;
-  const octx = offscreen.getContext('2d');
-  // Fundo escuro
-  octx.fillStyle = '#050709';
-  octx.fillRect(0, 0, offscreen.width, offscreen.height);
-  // Imagem de base se houver
+  const off = document.createElement('canvas');
+  const box = document.getElementById('preview-box');
+  off.width = box.offsetWidth; off.height = box.offsetHeight;
+  const octx = off.getContext('2d');
+  octx.fillStyle = '#050709'; octx.fillRect(0,0,off.width,off.height);
   const imgEl = document.getElementById('preview-image');
   if (imgEl.src && imgEl.style.display !== 'none') {
-    const box = document.getElementById('preview-box');
-    const r = imgEl.getBoundingClientRect();
-    const br = box.getBoundingClientRect();
-    octx.drawImage(imgEl, r.left - br.left, r.top - br.top, r.width, r.height);
+    const r = imgEl.getBoundingClientRect(), br = box.getBoundingClientRect();
+    octx.drawImage(imgEl, r.left-br.left, r.top-br.top, r.width, r.height);
   }
-  // Desenhos
   state.profDrawings.forEach(d => drawShape(octx, d));
-  broadcast(state.sessionCode, 'image', { type: 'drawing', src: offscreen.toDataURL('image/png') });
+  enviarWS({ type:'drawing', src: off.toDataURL('image/png') });
 }
-
-function enviarDesenho() {
-  broadcastProfDrawing();
-  showToast('✅ Desenho enviado para os alunos!', 'success');
-}
-
-// ===================== SHAPE RENDERER (compartilhado) =====================
-function drawShape(ctx, a) {
-  ctx.strokeStyle = a.color;
-  ctx.fillStyle = a.color;
-  ctx.lineWidth = a.size || 3;
-  ctx.lineCap = 'round';
-  ctx.lineJoin = 'round';
-
-  if (a.type === 'pen') {
-    if (!a.points || a.points.length < 2) return;
-    ctx.beginPath();
-    ctx.moveTo(a.points[0].x, a.points[0].y);
-    for (let i = 1; i < a.points.length; i++) ctx.lineTo(a.points[i].x, a.points[i].y);
-    ctx.stroke();
-  } else if (a.type === 'arrow') {
-    const dx = a.x2-a.x1, dy = a.y2-a.y1, len = Math.sqrt(dx*dx+dy*dy);
-    if (len < 5) return;
-    const angle = Math.atan2(dy, dx), hl = Math.max(14, (a.size||3)*4);
-    ctx.beginPath(); ctx.moveTo(a.x1, a.y1); ctx.lineTo(a.x2, a.y2); ctx.stroke();
-    ctx.beginPath();
-    ctx.moveTo(a.x2, a.y2);
-    ctx.lineTo(a.x2 - hl*Math.cos(angle-0.4), a.y2 - hl*Math.sin(angle-0.4));
-    ctx.lineTo(a.x2 - hl*Math.cos(angle+0.4), a.y2 - hl*Math.sin(angle+0.4));
-    ctx.closePath(); ctx.fill();
-  } else if (a.type === 'circle') {
-    const rx = Math.abs(a.x2-a.x1)/2, ry = Math.abs(a.y2-a.y1)/2;
-    ctx.beginPath();
-    ctx.ellipse((a.x1+a.x2)/2, (a.y1+a.y2)/2, Math.max(rx,2), Math.max(ry,2), 0, 0, 2*Math.PI);
-    ctx.stroke();
-  } else if (a.type === 'rect') {
-    ctx.beginPath();
-    ctx.strokeRect(a.x1, a.y1, a.x2-a.x1, a.y2-a.y1);
-  } else if (a.type === 'text') {
-    ctx.font = `${16 + (a.size||3)*2}px DM Sans, sans-serif`;
-    ctx.shadowColor = 'rgba(0,0,0,0.9)'; ctx.shadowBlur = 5;
-    ctx.fillText(a.text, a.x, a.y);
-    ctx.shadowBlur = 0;
-  }
-}
+function enviarDesenho() { broadcastProfDrawing(); showToast('✅ Desenho enviado!','success'); }
 
 function limparTudo() {
-  state.profDrawings = [];
-  redrawProfCanvas();
-  document.getElementById('preview-image').style.display = 'none';
-  document.getElementById('preview-image').src = '';
-  document.getElementById('placeholder-msg').style.display = 'block';
-  if (state.sessionCode) broadcast(state.sessionCode, 'image', { type: 'clear' });
+  state.profDrawings=[]; redrawProfCanvas();
+  document.getElementById('preview-image').style.display='none';
+  document.getElementById('preview-image').src='';
+  document.getElementById('placeholder-msg').style.display='block';
+  enviarWS({type:'clear'});
+}
+
+// ===================== SHAPE RENDERER =====================
+function drawShape(ctx, a) {
+  ctx.strokeStyle = a.color; ctx.fillStyle = a.color;
+  ctx.lineWidth = a.size||3; ctx.lineCap='round'; ctx.lineJoin='round';
+  if (a.type==='pen') {
+    if (!a.points||a.points.length<2) return;
+    ctx.beginPath(); ctx.moveTo(a.points[0].x,a.points[0].y);
+    for (let i=1;i<a.points.length;i++) ctx.lineTo(a.points[i].x,a.points[i].y);
+    ctx.stroke();
+  } else if (a.type==='arrow') {
+    const dx=a.x2-a.x1,dy=a.y2-a.y1,len=Math.sqrt(dx*dx+dy*dy); if(len<5) return;
+    const angle=Math.atan2(dy,dx),hl=Math.max(14,(a.size||3)*4);
+    ctx.beginPath(); ctx.moveTo(a.x1,a.y1); ctx.lineTo(a.x2,a.y2); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(a.x2,a.y2);
+    ctx.lineTo(a.x2-hl*Math.cos(angle-0.4),a.y2-hl*Math.sin(angle-0.4));
+    ctx.lineTo(a.x2-hl*Math.cos(angle+0.4),a.y2-hl*Math.sin(angle+0.4));
+    ctx.closePath(); ctx.fill();
+  } else if (a.type==='circle') {
+    ctx.beginPath(); ctx.ellipse((a.x1+a.x2)/2,(a.y1+a.y2)/2,Math.max(Math.abs(a.x2-a.x1)/2,2),Math.max(Math.abs(a.y2-a.y1)/2,2),0,0,2*Math.PI); ctx.stroke();
+  } else if (a.type==='rect') {
+    ctx.beginPath(); ctx.strokeRect(a.x1,a.y1,a.x2-a.x1,a.y2-a.y1);
+  } else if (a.type==='text') {
+    ctx.font=`${16+(a.size||3)*2}px DM Sans,sans-serif`;
+    ctx.shadowColor='rgba(0,0,0,0.9)'; ctx.shadowBlur=5;
+    ctx.fillText(a.text,a.x,a.y); ctx.shadowBlur=0;
+  }
 }
 
 // ===================== ALUNO =====================
@@ -734,39 +700,48 @@ function entrarSessao() {
   const nome = document.getElementById('input-nome').value.trim();
   const codigo = document.getElementById('input-codigo').value.trim().toUpperCase();
   if (!nome) { showToast('Digite seu nome'); return; }
-  if (!codigo || codigo.length < 3) { showToast('Digite o código'); return; }
+  if (!codigo||codigo.length<3) { showToast('Digite o código'); return; }
 
-  state.role = 'aluno'; state.nomeAluno = nome; state.sessionCode = codigo; state._intervals = [];
+  state.role='aluno'; state.nomeAluno=nome; state.sessionCode=codigo;
   closeModal();
-
-  // Registra
-  let viewers = {};
-  try { viewers = JSON.parse(localStorage.getItem(sk(codigo,'viewers')))?.data || {}; } catch(e) {}
-  viewers[nome] = Date.now();
-  broadcast(codigo, 'viewers', viewers);
-
   document.getElementById('aluno-session-label').textContent = codigo;
   document.getElementById('aluno-nome-label').textContent = 'Logado como: ' + nome;
   showScreen('aluno');
-  setTimeout(() => { redimensionarCanvas(); }, 100);
+  setTimeout(redimensionarCanvas, 100);
 
-  const iv = subscribe(codigo, 'image', (msg) => {
-    if (!msg) return;
-    if (msg.type === 'clear') {
+  setConnStatus('connecting','🔄 Conectando...');
+
+  // Conecta ao canal da sessão
+  abrirWS('radiumtela_' + codigo, (data) => {
+    if (!data || !data.type) return;
+    if (data.type === 'image' || data.type === 'screen' || data.type === 'drawing') {
+      if (data.src) {
+        const img = document.getElementById('aluno-image');
+        img.onload = () => { redimensionarCanvas(); redesenharAnotacoes(); };
+        img.src = data.src;
+        img.style.display = 'block';
+        document.getElementById('waiting-msg').style.display = 'none';
+      }
+    } else if (data.type === 'clear') {
       document.getElementById('aluno-image').style.display = 'none';
-      document.getElementById('aluno-video').style.display = 'none';
       document.getElementById('waiting-msg').style.display = 'flex';
+      document.getElementById('waiting-text').textContent = 'Aguardando o professor compartilhar...';
       limparAnotacoes();
-    } else if (msg.src) {
-      const img = document.getElementById('aluno-image');
-      img.onload = () => { redimensionarCanvas(); redesenharAnotacoes(); };
-      img.src = msg.src;
-      img.style.display = 'block';
-      document.getElementById('aluno-video').style.display = 'none';
-      document.getElementById('waiting-msg').style.display = 'none';
     }
   });
-  state._intervals.push(iv);
+
+  // Avisa professor que entrou
+  setTimeout(() => {
+    enviarWS({ type:'join', nome });
+    setConnStatus('connected','✅ Conectado');
+    document.getElementById('waiting-text').textContent = 'Aguardando o professor compartilhar...';
+  }, 1200);
+}
+
+function setConnStatus(cls, txt) {
+  const el = document.getElementById('conn-status');
+  el.className = 'conn-status ' + cls;
+  el.textContent = txt;
 }
 
 function checkUrlSession() {
@@ -780,130 +755,87 @@ const aCtx = aCanvas.getContext('2d');
 
 function redimensionarCanvas() {
   const viewer = document.getElementById('image-viewer');
-  aCanvas.width = viewer.offsetWidth;
-  aCanvas.height = viewer.offsetHeight;
+  aCanvas.width = viewer.offsetWidth; aCanvas.height = viewer.offsetHeight;
   redesenharAnotacoes();
 }
-
 function setTool(tool) {
   state.tool = tool;
   document.querySelectorAll('.tool-btn[id^=tool-]').forEach(b => b.classList.remove('active'));
   document.getElementById('tool-'+{arrow:'seta',pen:'caneta',circle:'circulo',text:'texto'}[tool]).classList.add('active');
 }
-
 function setColor(el) {
   state.color = el.dataset.color;
   el.closest('.annotation-bar').querySelectorAll('.color-dot').forEach(d => d.classList.remove('active'));
   el.classList.add('active');
 }
-
 function getAPos(e) {
-  const rect = aCanvas.getBoundingClientRect();
-  const touch = e.touches?.[0] || e;
-  return { x: touch.clientX - rect.left, y: touch.clientY - rect.top };
+  const rect = aCanvas.getBoundingClientRect(), touch = e.touches?.[0]||e;
+  return {x:touch.clientX-rect.left, y:touch.clientY-rect.top};
 }
 
 aCanvas.addEventListener('mousedown', startDraw);
 aCanvas.addEventListener('mousemove', moveDraw);
 aCanvas.addEventListener('mouseup', endDraw);
-aCanvas.addEventListener('touchstart', e => { e.preventDefault(); startDraw(e); }, { passive: false });
-aCanvas.addEventListener('touchmove', e => { e.preventDefault(); moveDraw(e); }, { passive: false });
+aCanvas.addEventListener('touchstart', e=>{e.preventDefault();startDraw(e);},{passive:false});
+aCanvas.addEventListener('touchmove', e=>{e.preventDefault();moveDraw(e);},{passive:false});
 aCanvas.addEventListener('touchend', endDraw);
 
 function startDraw(e) {
-  const pos = getAPos(e);
-  state.isDrawing = true; state.startX = pos.x; state.startY = pos.y;
-  const size = +document.getElementById('size-range').value;
-  if (state.tool === 'pen') {
-    state.currentAnnotation = { type: 'pen', color: state.color, size, points: [pos] };
-  } else if (state.tool === 'text') {
-    const text = prompt('Digite o texto:');
-    if (text) { state.annotations.push({ type: 'text', color: state.color, size, x: pos.x, y: pos.y, text }); redesenharAnotacoes(); }
-    state.isDrawing = false;
-  }
+  const pos=getAPos(e); state.isDrawing=true; state.startX=pos.x; state.startY=pos.y;
+  const size=+document.getElementById('size-range').value;
+  if (state.tool==='pen') { state.currentAnnotation={type:'pen',color:state.color,size,points:[pos]}; }
+  else if (state.tool==='text') { const t=prompt('Texto:'); if(t){state.annotations.push({type:'text',color:state.color,size,x:pos.x,y:pos.y,text:t});redesenharAnotacoes();} state.isDrawing=false; }
 }
 function moveDraw(e) {
   if (!state.isDrawing) return;
-  const pos = getAPos(e);
-  const size = +document.getElementById('size-range').value;
-  if (state.tool === 'pen' && state.currentAnnotation) {
-    state.currentAnnotation.points.push(pos); redesenharAnotacoes(); drawShape(aCtx, state.currentAnnotation);
-  } else if (['arrow','circle'].includes(state.tool)) {
-    redesenharAnotacoes();
-    drawShape(aCtx, { type: state.tool, color: state.color, size, x1: state.startX, y1: state.startY, x2: pos.x, y2: pos.y });
-  }
+  const pos=getAPos(e), size=+document.getElementById('size-range').value;
+  if (state.tool==='pen'&&state.currentAnnotation) { state.currentAnnotation.points.push(pos); redesenharAnotacoes(); drawShape(aCtx,state.currentAnnotation); }
+  else if (['arrow','circle'].includes(state.tool)) { redesenharAnotacoes(); drawShape(aCtx,{type:state.tool,color:state.color,size,x1:state.startX,y1:state.startY,x2:pos.x,y2:pos.y}); }
 }
 function endDraw(e) {
   if (!state.isDrawing) return;
-  const pos = getAPos(e);
-  state.isDrawing = false;
-  const size = +document.getElementById('size-range').value;
-  if (state.tool === 'pen' && state.currentAnnotation) { state.annotations.push(state.currentAnnotation); state.currentAnnotation = null; }
-  else if (['arrow','circle'].includes(state.tool)) {
-    state.annotations.push({ type: state.tool, color: state.color, size, x1: state.startX, y1: state.startY, x2: pos.x, y2: pos.y });
-  }
+  const pos=getAPos(e), size=+document.getElementById('size-range').value;
+  state.isDrawing=false;
+  if (state.tool==='pen'&&state.currentAnnotation) { state.annotations.push(state.currentAnnotation); state.currentAnnotation=null; }
+  else if (['arrow','circle'].includes(state.tool)) { state.annotations.push({type:state.tool,color:state.color,size,x1:state.startX,y1:state.startY,x2:pos.x,y2:pos.y}); }
   redesenharAnotacoes();
 }
-function redesenharAnotacoes() { aCtx.clearRect(0, 0, aCanvas.width, aCanvas.height); state.annotations.forEach(a => drawShape(aCtx, a)); }
+function redesenharAnotacoes() { aCtx.clearRect(0,0,aCanvas.width,aCanvas.height); state.annotations.forEach(a=>drawShape(aCtx,a)); }
 function desfazer() { state.annotations.pop(); redesenharAnotacoes(); showToast('Desfeito'); }
-function limparAnotacoes() { state.annotations = []; redesenharAnotacoes(); }
+function limparAnotacoes() { state.annotations=[]; redesenharAnotacoes(); }
 
-// ===================== SALVAR IMAGEM =====================
+// ===================== SALVAR =====================
 function salvarImagem() {
   const imgEl = document.getElementById('aluno-image');
-  if (!imgEl.src || imgEl.style.display === 'none') { showToast('Nenhuma imagem para salvar'); return; }
-  const off = document.createElement('canvas');
-  off.width = aCanvas.width; off.height = aCanvas.height;
-  const octx = off.getContext('2d');
-  const viewer = document.getElementById('image-viewer');
-  const r = imgEl.getBoundingClientRect(), br = viewer.getBoundingClientRect();
-  octx.fillStyle = '#050709'; octx.fillRect(0, 0, off.width, off.height);
-  octx.drawImage(imgEl, r.left-br.left, r.top-br.top, r.width, r.height);
-  octx.drawImage(aCanvas, 0, 0);
-  octx.font = '13px DM Mono, monospace';
-  octx.fillStyle = 'rgba(255,255,255,0.3)';
-  octx.fillText('Radium Tela · ' + state.nomeAluno + ' · ' + new Date().toLocaleString('pt-BR'), 10, off.height - 10);
-  const link = document.createElement('a');
-  link.download = 'radiumtela_' + state.sessionCode + '_' + Date.now() + '.png';
-  link.href = off.toDataURL('image/png');
-  link.click();
-  showToast('✅ Imagem salva!', 'success');
+  if (!imgEl.src||imgEl.style.display==='none') { showToast('Nenhuma imagem para salvar'); return; }
+  const off=document.createElement('canvas'); off.width=aCanvas.width; off.height=aCanvas.height;
+  const octx=off.getContext('2d');
+  const viewer=document.getElementById('image-viewer');
+  const r=imgEl.getBoundingClientRect(), br=viewer.getBoundingClientRect();
+  octx.fillStyle='#050709'; octx.fillRect(0,0,off.width,off.height);
+  octx.drawImage(imgEl,r.left-br.left,r.top-br.top,r.width,r.height);
+  octx.drawImage(aCanvas,0,0);
+  octx.font='13px DM Mono,monospace'; octx.fillStyle='rgba(255,255,255,0.3)';
+  octx.fillText('Radium Tela · '+(state.nomeAluno||'')+'· '+new Date().toLocaleString('pt-BR'),10,off.height-10);
+  const link=document.createElement('a');
+  link.download='radiumtela_'+state.sessionCode+'_'+Date.now()+'.png';
+  link.href=off.toDataURL('image/png'); link.click();
+  showToast('✅ Imagem salva!','success');
 }
 
 // ===================== INIT =====================
 window.addEventListener('resize', () => {
-  if (state.role === 'aluno') redimensionarCanvas();
-  if (state.profDrawMode) {
-    const box = document.getElementById('preview-box');
-    const c = document.getElementById('prof-draw-canvas');
-    c.width = box.offsetWidth; c.height = box.offsetHeight;
-    redrawProfCanvas();
-  }
+  if (state.role==='aluno') redimensionarCanvas();
+  if (state.profDrawMode) { const box=document.getElementById('preview-box'); const c=document.getElementById('prof-draw-canvas'); c.width=box.offsetWidth; c.height=box.offsetHeight; redrawProfCanvas(); }
 });
 document.addEventListener('keydown', e => {
-  if (e.ctrlKey && e.key === 'z') { if (state.role === 'professor') desfazerProfDraw(); else desfazer(); }
+  if (e.ctrlKey&&e.key==='z') { if(state.role==='professor') desfazerProfDraw(); else desfazer(); }
 });
-checkUrlSession();
 
 // Detecta iframe e mostra aviso
-function detectarIframe() {
-  try {
-    if (window.self !== window.top) {
-      document.getElementById("iframe-warning").style.display = "block";
-    }
-  } catch(e) {
-    document.getElementById("iframe-warning").style.display = "block";
-  }
-}
+try { if (window.self !== window.top) document.getElementById('iframe-warning').style.display='block'; } catch(e) { document.getElementById('iframe-warning').style.display='block'; }
 
-function abrirNovaAba() {
-  const html = document.documentElement.outerHTML;
-  const blob = new Blob([html], { type: "text/html" });
-  const url = URL.createObjectURL(blob);
-  window.open(url, "_blank");
-}
-
-detectarIframe();
+checkUrlSession();
 </script>
 </body>
 </html>

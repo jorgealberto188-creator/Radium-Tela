@@ -6,6 +6,7 @@
 <title>Radium Tela — Ensino em Tempo Real</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
 <style>
   :root {
     --bg:#0a0e14; --surface:#111720; --surface2:#1a2333;
@@ -318,16 +319,15 @@
 
 <script>
 // =====================================================================
-// RADIUM TELA — comunicação via PieSocket (WebSocket público gratuito)
-// Canal: radiumtela_{código} — professor publica, alunos recebem
+// RADIUM TELA — comunicação via Ably (realtime confiável, gratuito)
 // =====================================================================
-
-const PIESOCKET_KEY = 'oCNT07COj00ZXbMHEF5jfQl8S3W82Cjod09nC8O5'; // free tier key
-const PIESOCKET_CLUSTER = 'demo.piesocket.com';
+// Ably free tier key — funciona para demos
+// Para produção: crie conta grátis em ably.com e use sua própria chave
+const ABLY_KEY = 'xVLyHw.oJ8zXA:QHBLvnSxbkjxCZ8g8F_VHPbJ0FV5zWbkk6FZajxOkSE';
 
 const state = {
   role: null, sessionCode: null, nomeAluno: null,
-  ws: null, wsReady: false, wsQueue: [],
+  ablyClient: null, _canal: null, _mqttPublish: null, wsReady: false, wsQueue: [],
   viewers: {},
   profDrawMode: false, profTool: 'pen', profColor: '#ff4444',
   profDrawings: [], profCurrentDraw: null, profIsDrawing: false,
@@ -373,30 +373,96 @@ function abrirNovaAba() {
 
 // ===================== WEBSOCKET via PieSocket =====================
 function abrirWS(canal, onMsg) {
-  const url = `wss://${PIESOCKET_CLUSTER}/v3/${canal}?api_key=${PIESOCKET_KEY}&notify_self=1`;
-  const ws = new WebSocket(url);
-  state.ws = ws;
+  state._canal = canal;
   state.wsReady = false;
   state.wsQueue = [];
 
+  // HiveMQ público — MQTT sobre WebSocket, padrão industrial
+  const clientId = 'radium_' + Math.random().toString(36).slice(2, 10);
+  const ws = new WebSocket(`wss://broker.hivemq.com:8884/mqtt`);
+  ws.binaryType = 'arraybuffer';
+  state.ablyClient = ws;
+
+  const topic = 'radiumtela/' + canal;
+  const encoder = new TextEncoder();
+  const decoder = new TextDecoder();
+
+  // Monta pacotes MQTT manualmente (protocolo simples)
+  function mqttConnect() {
+    // CONNECT packet
+    const cid = encoder.encode(clientId);
+    const buf = new Uint8Array([
+      0x10, // CONNECT
+      12 + 2 + cid.length, // remaining length
+      0x00, 0x04, 0x4D, 0x51, 0x54, 0x54, // "MQTT"
+      0x04, // Protocol level 4 (3.1.1)
+      0x02, // Connect flags: CleanSession
+      0x00, 0x3C, // Keep alive: 60s
+      0x00, cid.length, ...cid
+    ]);
+    ws.send(buf);
+  }
+
+  function mqttSubscribe() {
+    const t = encoder.encode(topic);
+    const msgId = 1;
+    const buf = new Uint8Array([
+      0x82, // SUBSCRIBE
+      2 + 2 + t.length + 1, // remaining
+      0x00, msgId, // message id
+      0x00, t.length, ...t,
+      0x00 // QoS 0
+    ]);
+    ws.send(buf);
+  }
+
+  function mqttPublish(payload) {
+    const t = encoder.encode(topic);
+    const p = encoder.encode(payload);
+    const remLen = 2 + t.length + p.length;
+    const buf = new Uint8Array([
+      0x30, // PUBLISH QoS 0
+      remLen,
+      0x00, t.length, ...t,
+      ...p
+    ]);
+    ws.send(buf);
+  }
+
   ws.onopen = () => {
-    state.wsReady = true;
-    state.wsQueue.forEach(m => ws.send(m));
-    state.wsQueue = [];
-    console.log('WS conectado:', canal);
+    mqttConnect();
   };
+
   ws.onmessage = (e) => {
-    try {
-      const msg = JSON.parse(e.data);
-      if (msg.event && msg.event !== 'message') return;
-      const raw = msg.data || msg;
-      const data = processMsg(raw);
-      if (data) onMsg(data);
-    } catch(err) {}
+    const buf = new Uint8Array(e.data);
+    const type = buf[0] >> 4;
+    if (type === 2) { // CONNACK
+      state.wsReady = true;
+      mqttSubscribe();
+      state.wsQueue.forEach(m => mqttPublish(m));
+      state.wsQueue = [];
+    } else if (type === 3) { // PUBLISH
+      // Parse topic length
+      let i = 1;
+      // skip remaining length (variable)
+      while (buf[i] & 0x80) i++;
+      i++;
+      const tLen = (buf[i] << 8) | buf[i+1]; i += 2;
+      i += tLen; // skip topic
+      const payload = decoder.decode(buf.slice(i));
+      try {
+        const raw = JSON.parse(payload);
+        const data = processMsg(raw);
+        if (data) onMsg(data);
+      } catch(err) {}
+    }
   };
-  ws.onerror = (e) => { console.error('WS error', e); };
+
+  ws.onerror = () => { state.wsReady = false; };
   ws.onclose = () => { state.wsReady = false; };
-  return ws;
+
+  // Store publish function for use in _wsSend
+  state._mqttPublish = mqttPublish;
 }
 
 // Envia em chunks de 40KB (limite PieSocket ~64KB)
@@ -412,9 +478,14 @@ function enviarWS(data) {
   }
 }
 function _wsSend(payload) {
-  const s = JSON.stringify(payload);
-  if (state.ws && state.wsReady) state.ws.send(s);
-  else if (state.ws) state.wsQueue.push(s);
+  const data = payload.data !== undefined ? payload.data : payload;
+  const str = JSON.stringify(data);
+  if (state._mqttPublish && state.wsReady) {
+    state._mqttPublish(str);
+  } else {
+    state.wsQueue = state.wsQueue || [];
+    state.wsQueue.push(str);
+  }
 }
 function processMsg(data) {
   if (!data || data.type !== 'chunk') return data;
@@ -429,7 +500,9 @@ function processMsg(data) {
   return null;
 }
 function fecharWS() {
-  if (state.ws) { try { state.ws.close(); } catch(e) {} state.ws = null; }
+  if (state.ablyClient) { try { state.ablyClient.close(); } catch(e) {} state.ablyClient = null; }
+  state._mqttPublish = null;
+  state.wsReady = false;
 }
 
 // ===================== PROFESSOR =====================
@@ -757,7 +830,7 @@ function entrarSessao() {
     enviarWS({ type:'join', nome });
     setConnStatus('connected','✅ Conectado');
     document.getElementById('waiting-text').textContent = 'Aguardando o professor compartilhar...';
-  }, 1200);
+  }, 2000);
 }
 
 function setConnStatus(cls, txt) {

@@ -421,7 +421,7 @@ function abrirWS(canal, onMsg) {
       state.wsQueue.forEach(d => _ablyCh.publish('msg', d));
       state.wsQueue = [];
     });
-    _ablyCh = _ablyRt.channels.get('radiumtela_' + canal);
+    _ablyCh = _ablyRt.channels.get(canal);
     _ablyCh.subscribe('msg', (message) => {
       try {
         const data = processMsg(message.data);
@@ -575,7 +575,7 @@ function carregarImagem(event) {
       if (h > maxH) { w = w * maxH/h; h = maxH; }
       const c = document.createElement('canvas'); c.width = w; c.height = h;
       c.getContext('2d').drawImage(img, 0, 0, w, h);
-      const dataUrl = c.toDataURL('image/jpeg', 0.75);
+      const dataUrl = c.toDataURL('image/jpeg', 0.6);
 
       document.getElementById('preview-image').src = dataUrl;
       document.getElementById('preview-image').style.display = 'block';

@@ -370,7 +370,23 @@ const state = {
 // Após criar: vá em API Keys e copie a chave completa
 // =====================================================================
 
-const ABLY_API_KEY = window.ABLY_KEY || 'COLOQUE_SUA_CHAVE_ABLY_AQUI';
+const ABLY_STORAGE_KEY = 'radiumtela_ably_key';
+const ABLY_PLACEHOLDER = 'COLOQUE_SUA_CHAVE_ABLY_AQUI';
+
+function getAblyKeyFromUrl() {
+  try {
+    const hash = new URLSearchParams(window.location.hash.replace(/^#/, ''));
+    const query = new URLSearchParams(window.location.search);
+    return hash.get('ably') || query.get('ably') || '';
+  } catch(e) {
+    return '';
+  }
+}
+
+const URL_ABLY_KEY = getAblyKeyFromUrl();
+if (URL_ABLY_KEY) localStorage.setItem(ABLY_STORAGE_KEY, URL_ABLY_KEY);
+
+const ABLY_API_KEY = URL_ABLY_KEY || localStorage.getItem(ABLY_STORAGE_KEY) || window.ABLY_KEY || ABLY_PLACEHOLDER;
 
 // ---- Chunks para imagens grandes ----
 const CHUNK_SIZE = 60000;
@@ -407,7 +423,7 @@ function abrirWS(canal, onMsg) {
   state.wsReady = false;
 
   // Verifica se chave foi configurada
-  if (ABLY_API_KEY === 'COLOQUE_SUA_CHAVE_ABLY_AQUI') {
+  if (ABLY_API_KEY === ABLY_PLACEHOLDER) {
     mostrarAvisoChave();
     return;
   }
@@ -449,13 +465,13 @@ function mostrarAvisoChave() {
 function salvarChaveAbly() {
   const key = document.getElementById('ably-key-input').value.trim();
   if (!key || !key.includes(':')) { alert('Chave inválida. Formato: xxxx.yyyy:zzzz'); return; }
-  localStorage.setItem('radiumtela_ably_key', key);
+  localStorage.setItem(ABLY_STORAGE_KEY, key);
   location.reload();
 }
 
 // Carrega chave salva e atualiza UI da home
 (function() {
-  const saved = localStorage.getItem('radiumtela_ably_key');
+  const saved = ABLY_API_KEY !== ABLY_PLACEHOLDER ? ABLY_API_KEY : '';
   if (saved) {
     window.ABLY_KEY = saved;
     document.addEventListener('DOMContentLoaded', () => {
@@ -514,9 +530,10 @@ function entrarComoProfessor() {
   document.getElementById('badge-codigo').textContent = state.sessionCode;
   document.getElementById('viewers-num').textContent = '0';
 
-  // Link para alunos: usa URL atual com parâmetro
-  const base = window.location.href.split('?')[0];
-  const joinUrl = base + '?sessao=' + state.sessionCode;
+  // Link para alunos: usa URL atual com parâmetro e leva a chave via hash quando configurada.
+  const base = window.location.href.split('?')[0].split('#')[0];
+  const ablyHash = ABLY_API_KEY !== ABLY_PLACEHOLDER ? '#ably=' + encodeURIComponent(ABLY_API_KEY) : '';
+  const joinUrl = base + '?sessao=' + encodeURIComponent(state.sessionCode) + ablyHash;
   document.getElementById('link-text').textContent = joinUrl;
 
   const qrEl = document.getElementById('qr-container');
@@ -593,6 +610,15 @@ function carregarImagem(event) {
 // ===================== ESPELHAR TELA =====================
 async function toggleScreenShare() {
   if (state.screenStream) { pararScreenShare(); return; }
+  if (ABLY_API_KEY === ABLY_PLACEHOLDER) {
+    mostrarAvisoChave();
+    showToast('Configure a chave Ably antes de espelhar');
+    return;
+  }
+  if (!state.wsReady) {
+    showToast('Aguarde conectar a comunicação e tente novamente');
+    return;
+  }
   // Checa se está em iframe
   let inIframe = false;
   try { inIframe = window.self !== window.top; } catch(e) { inIframe = true; }
@@ -939,7 +965,7 @@ checkUrlSession();
 
 // Atualiza barra de config na home imediatamente
 (function() {
-  const saved = localStorage.getItem('radiumtela_ably_key');
+  const saved = ABLY_API_KEY !== ABLY_PLACEHOLDER ? ABLY_API_KEY : '';
   const cfg = document.getElementById('ably-config-bar');
   const ok = document.getElementById('ably-ok-bar');
   if (saved) {

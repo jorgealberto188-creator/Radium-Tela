@@ -270,6 +270,7 @@
         <button class="dtool-btn" id="ptool-circle" onclick="setProfTool('circle')">⭕ Círculo</button>
         <button class="dtool-btn" id="ptool-rect" onclick="setProfTool('rect')">▭ Retângulo</button>
         <button class="dtool-btn" id="ptool-text" onclick="setProfTool('text')">T Texto</button>
+        <button class="dtool-btn" id="ptool-move" onclick="setProfTool('move')">Mover</button>
         <div class="draw-sep"></div>
         <div class="color-dot active" style="background:#ff4444;" data-color="#ff4444" onclick="setProfColor(this)"></div>
         <div class="color-dot" style="background:#ffdd44;" data-color="#ffdd44" onclick="setProfColor(this)"></div>
@@ -344,6 +345,7 @@
       <button class="tool-btn active" id="tool-caneta" onclick="setTool('pen')">✏️ Caneta</button>
       <button class="tool-btn" id="tool-circulo" onclick="setTool('circle')">⭕ Círculo</button>
       <button class="tool-btn" id="tool-texto" onclick="setTool('text')">T Texto</button>
+      <button class="tool-btn" id="tool-mover" onclick="setTool('move')">Mover</button>
       <div class="divider"></div>
       <div class="color-dot active" style="background:#ff4444;" data-color="#ff4444" onclick="setColor(this)"></div>
       <div class="color-dot" style="background:#44ff88;" data-color="#44ff88" onclick="setColor(this)"></div>
@@ -366,11 +368,11 @@ const state = {
   viewers: {},
   profDrawMode: false, profTool: 'pen', profColor: '#ff4444',
   profDrawings: [], profCurrentDraw: null, profIsDrawing: false,
-  profStartX: 0, profStartY: 0,
+  profStartX: 0, profStartY: 0, profMovingText: null, profMoveOffsetX: 0, profMoveOffsetY: 0,
   screenStream: null, screenInterval: null,
   tool: 'pen', color: '#ff4444',
   annotations: [], currentAnnotation: null,
-  isDrawing: false, startX: 0, startY: 0,
+  isDrawing: false, startX: 0, startY: 0, movingText: null, moveOffsetX: 0, moveOffsetY: 0,
   alunoZoom: 1, alunoPanX: 0, alunoPanY: 0, alunoPanning: false,
   alunoPanStartX: 0, alunoPanStartY: 0, alunoPanBaseX: 0, alunoPanBaseY: 0,
   alunoPinching: false, alunoPinchStartDist: 0, alunoPinchStartZoom: 1,
@@ -736,6 +738,20 @@ function getProfPos(e) {
   return { x: touch.clientX - rect.left, y: touch.clientY - rect.top };
 }
 
+function findProfTextAt(pos) {
+  for (let i = state.profDrawings.length - 1; i >= 0; i--) {
+    const a = state.profDrawings[i];
+    if (a.type !== 'text') continue;
+    const fontSize = getTextFontSize(a);
+    profCtx.font = `${fontSize}px DM Sans,sans-serif`;
+    const width = profCtx.measureText(a.text).width;
+    if (pos.x >= a.x - 8 && pos.x <= a.x + width + 8 && pos.y >= a.y - fontSize - 8 && pos.y <= a.y + 10) {
+      return a;
+    }
+  }
+  return null;
+}
+
 profCanvas.addEventListener('mousedown', profStartDraw);
 profCanvas.addEventListener('mousemove', profMoveDraw);
 profCanvas.addEventListener('mouseup', profEndDraw);
@@ -749,15 +765,41 @@ function profStartDraw(e) {
   const pos = getProfPos(e);
   state.profIsDrawing = true; state.profStartX = pos.x; state.profStartY = pos.y;
   const size = +document.getElementById('prof-size-range').value;
+  const hitText = findProfTextAt(pos);
+  if (state.profTool === 'move' || hitText) {
+    state.profMovingText = hitText;
+    if (state.profMovingText) {
+      state.profMoveOffsetX = pos.x - state.profMovingText.x;
+      state.profMoveOffsetY = pos.y - state.profMovingText.y;
+    }
+    state.profIsDrawing = false;
+    return;
+  }
   if (state.profTool === 'pen') {
     state.profCurrentDraw = { type:'pen', color:state.profColor, size, points:[pos] };
   } else if (state.profTool === 'text') {
     const text = prompt('Texto:');
-    if (text) { state.profDrawings.push({type:'text',color:state.profColor,size,x:pos.x,y:pos.y,text}); redrawProfCanvas(); if (!state.screenStream) broadcastProfDrawing(); }
+    if (text) {
+      const textDraw = {type:'text',color:state.profColor,size,x:pos.x,y:pos.y,text};
+      state.profDrawings.push(textDraw);
+      state.profMovingText = textDraw;
+      state.profMoveOffsetX = 0; state.profMoveOffsetY = 0;
+      setProfTool('move');
+      redrawProfCanvas();
+      showToast('Arraste o texto para posicionar');
+      if (!state.screenStream) broadcastProfDrawing();
+    }
     state.profIsDrawing = false;
   }
 }
 function profMoveDraw(e) {
+  if (state.profMovingText) {
+    const pos = getProfPos(e);
+    state.profMovingText.x = pos.x - state.profMoveOffsetX;
+    state.profMovingText.y = pos.y - state.profMoveOffsetY;
+    redrawProfCanvas();
+    return;
+  }
   if (!state.profIsDrawing || !state.profDrawMode) return;
   const pos = getProfPos(e);
   const size = +document.getElementById('prof-size-range').value;
@@ -768,6 +810,12 @@ function profMoveDraw(e) {
   }
 }
 function profEndDraw(e) {
+  if (state.profMovingText) {
+    state.profMovingText = null;
+    redrawProfCanvas();
+    if (!state.screenStream) broadcastProfDrawing();
+    return;
+  }
   if (!state.profIsDrawing || !state.profDrawMode) return;
   const pos = getProfPos(e);
   state.profIsDrawing = false;
@@ -829,7 +877,7 @@ function drawShape(ctx, a) {
   } else if (a.type==='rect') {
     ctx.beginPath(); ctx.strokeRect(a.x1,a.y1,a.x2-a.x1,a.y2-a.y1);
   } else if (a.type==='text') {
-    ctx.font=`${16+(a.size||3)*2}px DM Sans,sans-serif`;
+    ctx.font=`${getTextFontSize(a)}px DM Sans,sans-serif`;
     ctx.shadowColor='rgba(0,0,0,0.9)'; ctx.shadowBlur=5;
     ctx.fillText(a.text,a.x,a.y); ctx.shadowBlur=0;
   }
@@ -1011,7 +1059,7 @@ function redimensionarCanvas() {
 function setTool(tool) {
   state.tool = tool;
   document.querySelectorAll('.tool-btn[id^=tool-]').forEach(b => b.classList.remove('active'));
-  document.getElementById('tool-'+{pen:'caneta',circle:'circulo',text:'texto'}[tool]).classList.add('active');
+  document.getElementById('tool-'+{pen:'caneta',circle:'circulo',text:'texto',move:'mover'}[tool]).classList.add('active');
 }
 function setColor(el) {
   state.color = el.dataset.color;
@@ -1021,6 +1069,22 @@ function setColor(el) {
 function getAPos(e) {
   const rect = aCanvas.getBoundingClientRect(), touch = e.touches?.[0] || e.changedTouches?.[0] || e;
   return {x:touch.clientX-rect.left, y:touch.clientY-rect.top};
+}
+
+function getTextFontSize(a) { return 16 + (a.size || 3) * 2; }
+
+function findTextAt(pos) {
+  for (let i = state.annotations.length - 1; i >= 0; i--) {
+    const a = state.annotations[i];
+    if (a.type !== 'text') continue;
+    const fontSize = getTextFontSize(a);
+    aCtx.font = `${fontSize}px DM Sans,sans-serif`;
+    const width = aCtx.measureText(a.text).width;
+    if (pos.x >= a.x - 8 && pos.x <= a.x + width + 8 && pos.y >= a.y - fontSize - 8 && pos.y <= a.y + 10) {
+      return a;
+    }
+  }
+  return null;
 }
 
 aCanvas.addEventListener('mousedown', startDraw);
@@ -1050,11 +1114,40 @@ function startDraw(e) {
   if (state.alunoZoom > 1) return;
   const pos=getAPos(e); state.isDrawing=true; state.startX=pos.x; state.startY=pos.y;
   const size=+document.getElementById('size-range').value;
+  const hitText = findTextAt(pos);
+  if (state.tool === 'move' || hitText) {
+    state.movingText = hitText;
+    if (state.movingText) {
+      state.moveOffsetX = pos.x - state.movingText.x;
+      state.moveOffsetY = pos.y - state.movingText.y;
+    }
+    state.isDrawing = false;
+    return;
+  }
   if (state.tool==='pen') { state.currentAnnotation={type:'pen',color:state.color,size,points:[pos]}; }
-  else if (state.tool==='text') { const t=prompt('Texto:'); if(t){state.annotations.push({type:'text',color:state.color,size,x:pos.x,y:pos.y,text:t});redesenharAnotacoes();} state.isDrawing=false; }
+  else if (state.tool==='text') {
+    const t=prompt('Texto:');
+    if(t){
+      const textAnno = {type:'text',color:state.color,size,x:pos.x,y:pos.y,text:t};
+      state.annotations.push(textAnno);
+      state.movingText = textAnno;
+      state.moveOffsetX = 0; state.moveOffsetY = 0;
+      setTool('move');
+      redesenharAnotacoes();
+      showToast('Arraste o texto para posicionar');
+    }
+    state.isDrawing=false;
+  }
 }
 function moveDraw(e) {
   if (e.touches && e.touches.length > 1) return;
+  if (state.movingText) {
+    const pos=getAPos(e);
+    state.movingText.x = pos.x - state.moveOffsetX;
+    state.movingText.y = pos.y - state.moveOffsetY;
+    redesenharAnotacoes();
+    return;
+  }
   if (!state.isDrawing) return;
   const pos=getAPos(e), size=+document.getElementById('size-range').value;
   if (state.tool==='pen'&&state.currentAnnotation) { state.currentAnnotation.points.push(pos); redesenharAnotacoes(); drawShape(aCtx,state.currentAnnotation); }
@@ -1062,6 +1155,7 @@ function moveDraw(e) {
 }
 function endDraw(e) {
   if (e.touches && e.touches.length > 1) return;
+  if (state.movingText) { state.movingText = null; return; }
   if (!state.isDrawing) return;
   const pos=getAPos(e), size=+document.getElementById('size-range').value;
   state.isDrawing=false;

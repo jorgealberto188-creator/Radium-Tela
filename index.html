@@ -113,9 +113,9 @@
   .aluno-session{font-family:var(--font-mono);font-size:0.7rem;color:var(--text-muted);letter-spacing:0.1em;}
   .aluno-actions{margin-left:auto;display:flex;gap:6px;}
   .aluno-body{display:flex;flex-direction:column;height:calc(100vh - 50px);}
-  .image-viewer{flex:1;position:relative;overflow:hidden;background:#050709;display:flex;align-items:center;justify-content:center;}
+  .image-viewer{flex:1;position:relative;overflow:hidden;background:#050709;display:flex;align-items:center;justify-content:center;touch-action:none;}
   #aluno-image{max-width:100%;max-height:100%;object-fit:contain;position:relative;z-index:1;user-select:none;display:none;transform-origin:center center;will-change:transform;}
-  #annotation-canvas{position:absolute;top:0;left:0;width:100%;height:100%;z-index:2;cursor:crosshair;}
+  #annotation-canvas{position:absolute;top:0;left:0;width:100%;height:100%;z-index:2;cursor:crosshair;touch-action:none;}
   .image-viewer.zoomed{cursor:grab;}
   .image-viewer.zoomed:active{cursor:grabbing;}
   .zoom-chip{font-family:var(--font-mono);font-size:0.72rem;color:var(--accent2);min-width:44px;text-align:center;}
@@ -332,14 +332,11 @@
       <canvas id="annotation-canvas"></canvas>
     </div>
     <div class="annotation-bar">
-      <button class="tool-btn" onclick="setAlunoZoom(state.alunoZoom + 0.25)">🔍 +</button>
-      <button class="tool-btn" onclick="setAlunoZoom(state.alunoZoom - 0.25)">🔍 -</button>
       <span class="zoom-chip" id="zoom-label">100%</span>
       <button class="tool-btn" onclick="resetAlunoZoom()">Ajustar</button>
       <div class="divider"></div>
       <span style="font-size:0.74rem;color:var(--text-dim);white-space:nowrap;">Anotar:</span>
-      <button class="tool-btn active" id="tool-seta" onclick="setTool('arrow')">↗ Seta</button>
-      <button class="tool-btn" id="tool-caneta" onclick="setTool('pen')">✏️ Caneta</button>
+      <button class="tool-btn active" id="tool-caneta" onclick="setTool('pen')">✏️ Caneta</button>
       <button class="tool-btn" id="tool-circulo" onclick="setTool('circle')">⭕ Círculo</button>
       <button class="tool-btn" id="tool-texto" onclick="setTool('text')">T Texto</button>
       <div class="divider"></div>
@@ -366,11 +363,13 @@ const state = {
   profDrawings: [], profCurrentDraw: null, profIsDrawing: false,
   profStartX: 0, profStartY: 0,
   screenStream: null, screenInterval: null,
-  tool: 'arrow', color: '#ff4444',
+  tool: 'pen', color: '#ff4444',
   annotations: [], currentAnnotation: null,
   isDrawing: false, startX: 0, startY: 0,
   alunoZoom: 1, alunoPanX: 0, alunoPanY: 0, alunoPanning: false,
   alunoPanStartX: 0, alunoPanStartY: 0, alunoPanBaseX: 0, alunoPanBaseY: 0,
+  alunoPinching: false, alunoPinchStartDist: 0, alunoPinchStartZoom: 1,
+  alunoPinchStartX: 0, alunoPinchStartY: 0,
 };
 
 // =====================================================================
@@ -921,11 +920,51 @@ function resetAlunoZoom() {
 }
 
 function getViewerPoint(e) {
-  const touch = e.touches?.[0] || e;
+  const touch = e.touches?.[0] || e.changedTouches?.[0] || e;
   return { x: touch.clientX, y: touch.clientY };
 }
 
+function getTouchDistance(e) {
+  const [a, b] = e.touches;
+  return Math.hypot(a.clientX - b.clientX, a.clientY - b.clientY);
+}
+
+function getTouchCenter(e) {
+  const [a, b] = e.touches;
+  return { x: (a.clientX + b.clientX) / 2, y: (a.clientY + b.clientY) / 2 };
+}
+
+function startAlunoPinch(e) {
+  if (!e.touches || e.touches.length < 2) return false;
+  const center = getTouchCenter(e);
+  state.alunoPinching = true;
+  state.alunoPanning = false;
+  state.isDrawing = false;
+  state.alunoPinchStartDist = getTouchDistance(e);
+  state.alunoPinchStartZoom = state.alunoZoom;
+  state.alunoPinchStartX = center.x;
+  state.alunoPinchStartY = center.y;
+  e.preventDefault();
+  return true;
+}
+
+function moveAlunoPinch(e) {
+  if (!state.alunoPinching || !e.touches || e.touches.length < 2) return false;
+  const center = getTouchCenter(e);
+  const nextZoom = state.alunoPinchStartZoom * (getTouchDistance(e) / state.alunoPinchStartDist);
+  state.alunoZoom = Math.max(1, Math.min(4, nextZoom));
+  state.alunoPanX += center.x - state.alunoPinchStartX;
+  state.alunoPanY += center.y - state.alunoPinchStartY;
+  state.alunoPinchStartX = center.x;
+  state.alunoPinchStartY = center.y;
+  if (state.alunoZoom === 1) { state.alunoPanX = 0; state.alunoPanY = 0; }
+  aplicarAlunoZoom();
+  e.preventDefault();
+  return true;
+}
+
 function startAlunoPan(e) {
+  if (startAlunoPinch(e)) return;
   if (state.alunoZoom <= 1) return;
   const p = getViewerPoint(e);
   state.alunoPanning = true;
@@ -935,6 +974,7 @@ function startAlunoPan(e) {
 }
 
 function moveAlunoPan(e) {
+  if (moveAlunoPinch(e)) return;
   if (!state.alunoPanning) return;
   const p = getViewerPoint(e);
   state.alunoPanX = state.alunoPanBaseX + (p.x - state.alunoPanStartX);
@@ -943,7 +983,10 @@ function moveAlunoPan(e) {
   e.preventDefault();
 }
 
-function endAlunoPan() { state.alunoPanning = false; }
+function endAlunoPan(e) {
+  if (!e?.touches || e.touches.length < 2) state.alunoPinching = false;
+  state.alunoPanning = false;
+}
 
 function redimensionarCanvas() {
   const viewer = document.getElementById('image-viewer');
@@ -954,7 +997,7 @@ function redimensionarCanvas() {
 function setTool(tool) {
   state.tool = tool;
   document.querySelectorAll('.tool-btn[id^=tool-]').forEach(b => b.classList.remove('active'));
-  document.getElementById('tool-'+{arrow:'seta',pen:'caneta',circle:'circulo',text:'texto'}[tool]).classList.add('active');
+  document.getElementById('tool-'+{pen:'caneta',circle:'circulo',text:'texto'}[tool]).classList.add('active');
 }
 function setColor(el) {
   state.color = el.dataset.color;
@@ -962,16 +1005,16 @@ function setColor(el) {
   el.classList.add('active');
 }
 function getAPos(e) {
-  const rect = aCanvas.getBoundingClientRect(), touch = e.touches?.[0]||e;
+  const rect = aCanvas.getBoundingClientRect(), touch = e.touches?.[0] || e.changedTouches?.[0] || e;
   return {x:touch.clientX-rect.left, y:touch.clientY-rect.top};
 }
 
 aCanvas.addEventListener('mousedown', startDraw);
 aCanvas.addEventListener('mousemove', moveDraw);
 aCanvas.addEventListener('mouseup', endDraw);
-aCanvas.addEventListener('touchstart', e=>{e.preventDefault();startDraw(e);},{passive:false});
-aCanvas.addEventListener('touchmove', e=>{e.preventDefault();moveDraw(e);},{passive:false});
-aCanvas.addEventListener('touchend', endDraw);
+aCanvas.addEventListener('touchstart', e=>{ if (startAlunoPinch(e)) return; e.preventDefault(); startDraw(e); },{passive:false});
+aCanvas.addEventListener('touchmove', e=>{ if (moveAlunoPinch(e)) return; e.preventDefault(); moveDraw(e); },{passive:false});
+aCanvas.addEventListener('touchend', e=>{ endAlunoPan(e); endDraw(e); });
 
 const imageViewer = document.getElementById('image-viewer');
 imageViewer.addEventListener('mousedown', startAlunoPan);
@@ -989,6 +1032,7 @@ imageViewer.addEventListener('wheel', e => {
 }, {passive:false});
 
 function startDraw(e) {
+  if (e.touches && e.touches.length > 1) return;
   if (state.alunoZoom > 1) return;
   const pos=getAPos(e); state.isDrawing=true; state.startX=pos.x; state.startY=pos.y;
   const size=+document.getElementById('size-range').value;
@@ -996,17 +1040,19 @@ function startDraw(e) {
   else if (state.tool==='text') { const t=prompt('Texto:'); if(t){state.annotations.push({type:'text',color:state.color,size,x:pos.x,y:pos.y,text:t});redesenharAnotacoes();} state.isDrawing=false; }
 }
 function moveDraw(e) {
+  if (e.touches && e.touches.length > 1) return;
   if (!state.isDrawing) return;
   const pos=getAPos(e), size=+document.getElementById('size-range').value;
   if (state.tool==='pen'&&state.currentAnnotation) { state.currentAnnotation.points.push(pos); redesenharAnotacoes(); drawShape(aCtx,state.currentAnnotation); }
-  else if (['arrow','circle'].includes(state.tool)) { redesenharAnotacoes(); drawShape(aCtx,{type:state.tool,color:state.color,size,x1:state.startX,y1:state.startY,x2:pos.x,y2:pos.y}); }
+  else if (state.tool === 'circle') { redesenharAnotacoes(); drawShape(aCtx,{type:state.tool,color:state.color,size,x1:state.startX,y1:state.startY,x2:pos.x,y2:pos.y}); }
 }
 function endDraw(e) {
+  if (e.touches && e.touches.length > 1) return;
   if (!state.isDrawing) return;
   const pos=getAPos(e), size=+document.getElementById('size-range').value;
   state.isDrawing=false;
   if (state.tool==='pen'&&state.currentAnnotation) { state.annotations.push(state.currentAnnotation); state.currentAnnotation=null; }
-  else if (['arrow','circle'].includes(state.tool)) { state.annotations.push({type:state.tool,color:state.color,size,x1:state.startX,y1:state.startY,x2:pos.x,y2:pos.y}); }
+  else if (state.tool === 'circle') { state.annotations.push({type:state.tool,color:state.color,size,x1:state.startX,y1:state.startY,x2:pos.x,y2:pos.y}); }
   redesenharAnotacoes();
 }
 function redesenharAnotacoes() { aCtx.clearRect(0,0,aCanvas.width,aCanvas.height); state.annotations.forEach(a=>drawShape(aCtx,a)); }

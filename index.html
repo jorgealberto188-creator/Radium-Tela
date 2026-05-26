@@ -119,6 +119,8 @@
   .image-viewer.zoomed{cursor:grab;}
   .image-viewer.zoomed:active{cursor:grabbing;}
   .zoom-chip{font-family:var(--font-mono);font-size:0.72rem;color:var(--accent2);min-width:44px;text-align:center;}
+  .floating-clear-btn{position:absolute;top:10px;right:10px;z-index:6;background:rgba(255,107,107,0.92);color:#fff;border:1px solid rgba(255,255,255,0.18);border-radius:8px;padding:0.45rem 0.7rem;font-family:var(--font-display);font-size:0.76rem;font-weight:700;cursor:pointer;box-shadow:0 6px 18px rgba(0,0,0,0.28);}
+  .floating-clear-btn:active{transform:scale(0.98);}
   .waiting-msg{text-align:center;color:var(--text-muted);display:flex;flex-direction:column;align-items:center;gap:1rem;padding:2rem;}
   .waiting-msg .icon{font-size:3rem;}
   .waiting-msg p{font-size:0.9rem;line-height:1.6;}
@@ -330,6 +332,7 @@
       </div>
       <img id="aluno-image" alt="Imagem do professor"/>
       <canvas id="annotation-canvas"></canvas>
+      <button class="floating-clear-btn" onclick="limparAnotacoes(); showToast('Anotações apagadas')">Apagar</button>
     </div>
     <div class="annotation-bar">
       <span class="zoom-chip" id="zoom-label">100%</span>
@@ -936,6 +939,15 @@ function getTouchCenter(e) {
 }
 
 function startAlunoPinch(e) {
+  if (e.touches && e.touches.length >= 3) {
+    limparAnotacoes();
+    showToast('Anotações apagadas');
+    state.isDrawing = false;
+    state.alunoPanning = false;
+    state.alunoPinching = false;
+    e.preventDefault();
+    return true;
+  }
   if (!e.touches || e.touches.length < 2) return false;
   const center = getTouchCenter(e);
   state.alunoPinching = true;
